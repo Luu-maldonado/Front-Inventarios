@@ -9,6 +9,7 @@ export default function Header() {
         <Link href="/articulos" className="hover:underline">Artículos</Link>
         <Link href="/proveedores" className="hover:underline">Proveedores</Link>
         <Link href="/ordenes" className="hover:underline">Órdenes</Link>
+        <Link href="/ventas" className="hover:underline">Ventas</Link>
       </nav>
     </header>
   )

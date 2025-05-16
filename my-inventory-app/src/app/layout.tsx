@@ -5,7 +5,7 @@ import Header from '@/app/components/Header'
 import Footer from '@/app/components/Footer'
 
 export const metadata = {
-  title: 'IAtomica App',
+  title: 'Via srl',
   description: 'Gestión de ventas y proveedores',
 }
 
