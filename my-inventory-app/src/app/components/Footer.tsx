@@ -1,8 +1,9 @@
-// components/Footer.tsx
 export default function Footer() {
   return (
-    <footer className="bg-gray-200 text-center p-4 mt-8">
-      <p className="text-sm">&copy; {new Date().getFullYear()} IAtomica. Todos los derechos reservados.</p>
+    <footer className="w-[1440px] h-[56px] bg-[#27272A] flex items-center justify-center mt-8">
+      <div className="text-[#A1A1AA] text-sm font-['Poppins']">
+        © 2025 - Sistema de Inventario | Investigación Operativa
+      </div>
     </footer>
-  )
+  );
 }
