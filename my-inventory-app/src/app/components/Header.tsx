@@ -8,7 +8,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
         
         <div className="flex items-center gap-2  bg-black px-4 py-2 rounded">
-          <Image src="/image.png" alt="Logo" width={110} height={50} />
+          <Image src="/image.png" alt="Logo" width={130} height={60} />
         </div>
        
         <nav className="flex mx-auto items-center text-sm font-medium tracking-wide ml-auto">
