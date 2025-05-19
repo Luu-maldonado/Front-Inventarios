@@ -1,4 +1,4 @@
-// app/layout.tsx
+
 import './globals.css'
 import { ReactNode } from 'react'
 import Header from '@/app/components/Header'
@@ -12,9 +12,9 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+      <body className="flex-col bg-[#0F0F0F]">
         <Header />
-        <main className="flex-grow p-4">{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

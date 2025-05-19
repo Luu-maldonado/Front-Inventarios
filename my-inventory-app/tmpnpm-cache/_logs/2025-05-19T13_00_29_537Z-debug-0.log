@@ -1,0 +1,28 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.3.0
+2 info using node@v22.14.0
+3 silly config load:file:C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\lucim\Documents\GitHub\Front-Inventarios\my-inventory-app\.npmrc
+5 silly config load:file:C:\Users\lucim\.npmrc
+6 silly config load:file:C:\Users\lucim\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm exec tailwindcss init -p
+8 verbose argv "exec" "--" "tailwindcss" "init" "-p"
+9 verbose logfile logs-max:10 dir:C:\Users\lucim\Documents\GitHub\Front-Inventarios\my-inventory-app\tmpnpm-cache\_logs\2025-05-19T13_00_29_537Z-
+10 verbose logfile C:\Users\lucim\Documents\GitHub\Front-Inventarios\my-inventory-app\tmpnpm-cache\_logs\2025-05-19T13_00_29_537Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+14 verbose stack Error: could not determine executable to run
+14 verbose stack     at getBinFromManifest (C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\node_modules\libnpmexec\lib\get-bin-from-manifest.js:17:23)
+14 verbose stack     at exec (C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\node_modules\libnpmexec\lib\index.js:205:15)
+14 verbose stack     at async Npm.exec (C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\lib\npm.js:208:9)
+14 verbose stack     at async module.exports (C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\lib\cli\entry.js:67:5)
+15 verbose pkgid tailwindcss@4.1.7
+16 error could not determine executable to run
+17 verbose cwd C:\Users\lucim\Documents\GitHub\Front-Inventarios\my-inventory-app
+18 verbose os Windows_NT 10.0.26100
+19 verbose node v22.14.0
+20 verbose npm  v11.3.0
+21 verbose exit 1
+22 verbose code 1
+23 error A complete log of this run can be found in: C:\Users\lucim\Documents\GitHub\Front-Inventarios\my-inventory-app\tmpnpm-cache\_logs\2025-05-19T13_00_29_537Z-debug-0.log
