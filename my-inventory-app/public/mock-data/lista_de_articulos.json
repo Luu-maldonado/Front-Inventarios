@@ -1,0 +1,59 @@
+{
+  "idListaDeArticulo": 1,
+  "fechaInicioLista": "2025-06-01T00:00:00Z",
+  "fechaFinLista": null,
+  "articulos": [
+    {
+      "idArticulo": 1,
+      "nombreArticulo": "Memoria RAM 8GB DDR4",
+      "descripcionArticulo": "RAM HyperX para PC",
+      "demandaAnual": 150,
+      "costoAlmacenaje": 12.5,
+      "costoPedido": 40.0,
+      "costoCompra": 65.0,
+      "modeloInventario": {
+        "idModeloInventario": 1,
+        "nombreModelo": "Lote Fijo"
+      },
+      "proveedorPredeterminado": {
+        "idProveedor": 101,
+        "nombreProveedor": "Proveedor X",
+        "tipoProveedor": "Tecnología"
+      },
+      "stock": {
+        "stockSeguridad": 20,
+        "stockActual": 35,
+        "fechaStockInicio": "2025-06-01T00:00:00Z",
+        "fechaStockFin": null
+      },
+      "estado": "activo",
+      "fechaBaja": null
+    },
+    {
+      "idArticulo": 2,
+      "nombreArticulo": "Disco SSD 512GB",
+      "descripcionArticulo": "Unidad sólida Kingston",
+      "demandaAnual": 100,
+      "costoAlmacenaje": 10.0,
+      "costoPedido": 30.0,
+      "costoCompra": 85.0,
+      "modeloInventario": {
+        "idModeloInventario": 2,
+        "nombreModelo": "Intervalo Fijo"
+      },
+      "proveedorPredeterminado": {
+        "idProveedor": 102,
+        "nombreProveedor": "Proveedor Y",
+        "tipoProveedor": "Electrónica"
+      },
+      "stock": {
+        "stockSeguridad": 15,
+        "stockActual": 12,
+        "fechaStockInicio": "2025-06-01T00:00:00Z",
+        "fechaStockFin": null
+      },
+      "estado": "activo",
+      "fechaBaja": null
+    }
+  ]
+}

@@ -44,19 +44,6 @@ export default function Home() {
           route="/ventas"
         />
       </div>
-      <iframe
-  src="https://luu-maldonado.github.io/bottas-chat-widget-dist/embed.html"
-  style={{
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
-    width: '400px',
-    height: '600px',
-    border: 'none',
-    zIndex: 9999,
-  }}
-  title="Chatbot"
-/>
     </div>
   );
 }
