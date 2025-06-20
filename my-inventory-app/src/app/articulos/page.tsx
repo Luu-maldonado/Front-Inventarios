@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   FaSearch,
-  FaPlus,
   FaEdit,
   FaTrash,
   FaCalculator,
@@ -28,11 +27,10 @@ interface Articulo {
     tipoProveedor: string
   }
   stock: {
-    stockSeguridad: number
-    stockActual: number
-    fechaStockInicio: string
-    fechaStockFin: string | null
+    stockActual: number;
+    stockSeguridad: number;
   }
+
   estado: string
   fechaBaja: string | null
 }
@@ -44,8 +42,17 @@ export default function Articulos() {
   const FaSearchIcon = FaSearch as unknown as React.FC<{ className?: string }>
   const [modalEditar, setModalEditar] = useState<Articulo | null>(null);
   const [modalEliminar, setModalEliminar] = useState<Articulo | null>(null);
-  const [modalCalculo, setModalCalculo] = useState<Articulo | null>(null);
   const [modalAgregar, setModalAgregar] = useState<boolean>(false);
+  const [modelosInventario, setModelosInventario] = useState<{ idModeloInventario: number, nombreModelo: string }[]>([]);
+  const [proveedores, setProveedores] = useState<{ idProveedor: number, nombreProveedor: string }[]>([]);
+  const [modalStock, setModalStock] = useState<boolean>(false);
+  const [modalCalculoGlobal, setModalCalculoGlobal] = useState(false);
+  const [calculosInventario, setCalculosInventario] = useState<
+    { idArticulo: number; nombreArticulo: string; loteFijo: number; intervaloFijo: number }[]
+  >([]);
+  const [busquedaCalculo, setBusquedaCalculo] = useState("");
+  const [busquedaStock, setBusquedaStock] = useState("");
+
 
 
   useEffect(() => {
@@ -55,14 +62,63 @@ export default function Articulos() {
   }, []);
 
   const filtrados = articulos.filter((art) =>
-    art.nombreArticulo.toLowerCase().includes(busqueda.toLowerCase())
+    art.nombreArticulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+    art.descripcionArticulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+    String(art.idArticulo).includes(busqueda)
   );
 
-  const handleAgregar = (nuevo: Articulo) => {
-  setArticulos((prev) => [...prev, nuevo]);
-  setModalAgregar(false);
-};
 
+  const handleAgregar = (nuevo: Articulo) => {
+    setArticulos((prev) => [...prev, nuevo]);
+    setModalAgregar(false);
+  };
+  useEffect(() => {
+    fetch("/mock-data/lista_de_articulos.json")
+      .then((res) => res.json())
+      .then((data) => setArticulos(data.articulos));
+
+    fetch("/mock-data/modelos_inventario.json")
+      .then((res) => res.json())
+      .then((data) => setModelosInventario(data.modelos)); // ← debe tener { idModeloInventario, nombreModelo }
+
+    fetch("/mock-data/proveedores.json")
+      .then((res) => res.json())
+      .then((data) => setProveedores(data.proveedores)); // ← debe tener { idProveedor, nombreProveedor }
+  }, []);
+
+  const handleEditar = (articuloEditado: Articulo) => {
+    setArticulos(prev =>
+      prev.map((art) =>
+        art.idArticulo === articuloEditado.idArticulo ? articuloEditado : art
+      )
+    );
+    setModalEditar(null);
+  };
+
+  const handleEliminar = (id: number) => {
+    setArticulos((prev) => prev.filter((art) => art.idArticulo !== id));
+    setModalEliminar(null);
+  };
+
+  const cargarCalculos = async () => {
+    try {
+      const res = await fetch("/mock-data/calculos_inventarios.json"); // <-- ajustá a tu endpoint real
+      const data = await res.json();
+      setCalculosInventario(data.calculos); // estructura esperada: [{ idArticulo, nombreArticulo, loteFijo, intervaloFijo }]
+      setModalCalculoGlobal(true);
+    } catch (error) {
+      console.error("Error al cargar cálculos:", error);
+    }
+  };
+  const calculosFiltrados = calculosInventario.filter((item) =>
+    item.nombreArticulo.toLowerCase().includes(busquedaCalculo.toLowerCase()) ||
+    String(item.idArticulo).includes(busquedaCalculo)
+  );
+
+  const articulosFiltradosStock = articulos.filter((art) =>
+    art.nombreArticulo.toLowerCase().includes(busquedaStock.toLowerCase()) ||
+    String(art.idArticulo).includes(busquedaStock)
+  );
 
   return (
     <div className="text-white px-6 py-10">
@@ -80,8 +136,21 @@ export default function Articulos() {
           />
         </div>
         <button onClick={() => setModalAgregar(true)} className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90">
-          AGREGAR
+          AGREGAR ARTICULO
         </button>
+        <button
+          onClick={cargarCalculos}
+          className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90"
+        >
+          <FaCalculator />
+        </button>
+        <button
+          onClick={() => setModalStock(true)}
+          className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90"
+        >
+          MANEJO DE STOCK
+        </button>
+
       </div>
 
       <div className="overflow-x-auto">
@@ -116,9 +185,6 @@ export default function Articulos() {
                   <button onClick={() => setModalEditar(art)} className="mr-2 hover:text-yellow-300">
                     <FaEdit />
                   </button>
-                  <button onClick={() => setModalCalculo(art)} className="mr-2 hover:text-cyan-300">
-                    <FaCalculator />
-                  </button>
                   <button onClick={() => setModalEliminar(art)} className="hover:text-red-500">
                     <FaTrash />
                   </button>
@@ -129,12 +195,17 @@ export default function Articulos() {
         </table>
       </div>
 
+      {/* Modal Agregar */}
       {modalAgregar && (
         <Modal title="Agregar Artículo" onClose={() => setModalAgregar(false)}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               const form = e.currentTarget;
+              const idProveedor = Number(form.idProveedor.value);
+              const proveedorSeleccionado = proveedores.find((p) => p.idProveedor === idProveedor);
+              const idModeloInventario = Number(form.idModeloInventario.value);
+              const modeloSeleccionado = modelosInventario.find((m) => m.idModeloInventario === idModeloInventario);
               const nuevo: Articulo = {
                 idArticulo: articulos.length + 1,
                 nombreArticulo: form.nombreArticulo.value,
@@ -144,37 +215,47 @@ export default function Articulos() {
                 costoPedido: Number(form.costoPedido.value),
                 costoCompra: Number(form.costoCompra.value),
                 modeloInventario: {
-                  idModeloInventario: 1,
-                  nombreModelo: form.modeloInventario.value,
+                  idModeloInventario: modeloSeleccionado!.idModeloInventario,
+                  nombreModelo: modeloSeleccionado!.nombreModelo,
                 },
                 proveedorPredeterminado: {
-                  idProveedor: 1,
-                  nombreProveedor: form.proveedor.value,
+                  idProveedor: proveedorSeleccionado!.idProveedor,
+                  nombreProveedor: proveedorSeleccionado!.nombreProveedor,
                   tipoProveedor: "General",
                 },
                 stock: {
-                  stockSeguridad: Number(form.stockSeguridad.value),
-                  stockActual: Number(form.stockActual.value),
-                  fechaStockInicio: new Date().toISOString(),
-                  fechaStockFin: null,
+                  stockActual: 0,
+                  stockSeguridad: 0
                 },
+
                 estado: "activo",
                 fechaBaja: null,
               };
-              handleAgregar(nuevo);
+              if (window.confirm("¿Confirmás que querés agregar este artículo?")) {
+                handleAgregar(nuevo);
+              }
+
             }}
             className="space-y-2"
           >
             <input name="nombreArticulo" placeholder="Nombre" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
             <input name="descripcionArticulo" placeholder="Descripción" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="demandaAnual" type="number" placeholder="Demanda Anual" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="costoAlmacenaje" type="number" placeholder="Costo Almacenaje" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="costoPedido" type="number" placeholder="Costo Pedido" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="costoCompra" type="number" placeholder="Costo Compra" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="proveedor" placeholder="Proveedor" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="modeloInventario" placeholder="Modelo Inventario" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="stockSeguridad" type="number" placeholder="Stock Seguridad" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="stockActual" type="number" placeholder="Stock Actual" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="demandaAnual" type="number" placeholder="Demanda Anual" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoAlmacenaje" type="number" placeholder="Costo Almacenaje" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoPedido" type="number" placeholder="Costo Pedido" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoCompra" type="number" placeholder="Costo Compra" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <select name="idProveedor" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required>
+              <option value="">Seleccionar Proveedor</option>
+              {proveedores.map((p) => (
+                <option key={p.idProveedor} value={p.idProveedor}>{p.nombreProveedor}</option>
+              ))}
+            </select>
+            <select name="idModeloInventario" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required>
+              <option value="">Seleccionar Modelo de Inventario</option>
+              {modelosInventario.map((m) => (
+                <option key={m.idModeloInventario} value={m.idModeloInventario}>{m.nombreModelo}</option>
+              ))}
+            </select>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setModalAgregar(false)} className="bg-zinc-600 px-4 py-2 rounded">
                 Cancelar
@@ -190,36 +271,190 @@ export default function Articulos() {
       {/* Modal Edición */}
       {modalEditar && (
         <Modal title="Editar Artículo" onClose={() => setModalEditar(null)}>
-          <p className="text-sm mb-4 text-gray-400">Aquí puedes editar los datos del producto: <strong>{modalEditar.nombreArticulo}</strong></p>
-          {/* Inputs simulados */}
-          <input className="w-full mb-2 p-2 rounded bg-zinc-900 border border-zinc-600" defaultValue={modalEditar.descripcionArticulo} />
-          <div className="flex justify-end mt-4">
-            <button onClick={() => setModalEditar(null)} className="bg-zinc-600 px-4 py-2 rounded mr-2">Cancelar</button>
-            <button className="bg-white text-black px-4 py-2 rounded">Confirmar</button>
-          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+
+              const idProveedor = Number(form.idProveedor.value);
+              const proveedorSeleccionado = proveedores.find((p) => p.idProveedor === idProveedor);
+
+              const idModeloInventario = Number(form.idModeloInventario.value);
+              const modeloSeleccionado = modelosInventario.find((m) => m.idModeloInventario === idModeloInventario);
+
+              const articuloEditado: Articulo = {
+                idArticulo: modalEditar.idArticulo, // NO SE MODIFICA
+                nombreArticulo: form.nombreArticulo.value,
+                descripcionArticulo: form.descripcionArticulo.value,
+                demandaAnual: Number(form.demandaAnual.value),
+                costoAlmacenaje: Number(form.costoAlmacenaje.value),
+                costoPedido: Number(form.costoPedido.value),
+                costoCompra: Number(form.costoCompra.value),
+                modeloInventario: {
+                  idModeloInventario: modeloSeleccionado!.idModeloInventario,
+                  nombreModelo: modeloSeleccionado!.nombreModelo,
+                },
+                proveedorPredeterminado: {
+                  idProveedor: proveedorSeleccionado!.idProveedor,
+                  nombreProveedor: proveedorSeleccionado!.nombreProveedor,
+                  tipoProveedor: "General",
+                },
+                stock: {
+                  stockActual: 0,
+                  stockSeguridad: 0
+                },
+
+                estado: modalEditar.estado,
+                fechaBaja: modalEditar.fechaBaja,
+              };
+
+              if (window.confirm("¿Guardar los cambios de este artículo?")) {
+                handleEditar(articuloEditado);
+              }
+            }}
+            className="space-y-2"
+          >
+            <input value={modalEditar.idArticulo} disabled className="w-full p-2 bg-zinc-700 border border-zinc-600 rounded text-gray-400" />
+            <input name="nombreArticulo" defaultValue={modalEditar.nombreArticulo} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="descripcionArticulo" defaultValue={modalEditar.descripcionArticulo} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="demandaAnual" type="number" defaultValue={modalEditar.demandaAnual} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoAlmacenaje" type="number" defaultValue={modalEditar.costoAlmacenaje} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoPedido" type="number" defaultValue={modalEditar.costoPedido} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+            <input name="costoCompra" type="number" defaultValue={modalEditar.costoCompra} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+
+            <select name="idProveedor" defaultValue={modalEditar.proveedorPredeterminado.idProveedor} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required>
+              <option value="">Seleccionar Proveedor</option>
+              {proveedores.map((p) => (
+                <option key={p.idProveedor} value={p.idProveedor}>{p.nombreProveedor}</option>
+              ))}
+            </select>
+
+            <select name="idModeloInventario" defaultValue={modalEditar.modeloInventario.idModeloInventario} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required>
+              <option value="">Seleccionar Modelo de Inventario</option>
+              {modelosInventario.map((m) => (
+                <option key={m.idModeloInventario} value={m.idModeloInventario}>{m.nombreModelo}</option>
+              ))}
+            </select>
+
+
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setModalEditar(null)} className="bg-zinc-600 px-4 py-2 rounded">
+                Cancelar
+              </button>
+              <button type="submit" className="bg-white text-black px-4 py-2 rounded">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
         </Modal>
       )}
-
       {/* Modal Eliminación */}
       {modalEliminar && (
         <Modal title="Eliminar Artículo" onClose={() => setModalEliminar(null)}>
-          <p className="mb-4"> ¿Desea eliminar el artículo <strong>{modalEliminar.nombreArticulo}</strong>?</p>
+          <p className="mb-4">¿Desea eliminar el artículo <strong>{modalEliminar.nombreArticulo}</strong>?</p>
           <div className="flex justify-end">
             <button onClick={() => setModalEliminar(null)} className="bg-zinc-600 px-4 py-2 rounded mr-2">Cancelar</button>
-            <button className="bg-white text-black px-4 py-2 rounded">Aceptar</button>
+            <button
+              onClick={() => handleEliminar(modalEliminar.idArticulo)}
+              className="bg-white text-black px-4 py-2 rounded"
+            >
+              Aceptar
+            </button>
+          </div>
+        </Modal>
+      )}
+      {/* Modal Cálculo */}
+      {modalCalculoGlobal && (
+        <Modal title="Cálculo de Modelos de Inventario" onClose={() => setModalCalculoGlobal(false)}>
+          <div className="text-sm text-white space-y-4 max-h-[70vh] overflow-y-auto">
+            <input
+              type="text"
+              placeholder="Buscar por ID o nombre"
+              value={busquedaCalculo}
+              onChange={(e) => setBusquedaCalculo(e.target.value)}
+              className="w-full p-2 mb-4 bg-zinc-800 border border-zinc-600 rounded text-white"
+            />
+            {calculosFiltrados.map((item) => (
+              <div key={item.idArticulo} className="border-b border-zinc-600 pb-2">
+                <h3 className="font-bold text-yellow-300 mb-1">{item.nombreArticulo}</h3>
+                <p>Lote Fijo (EOQ): <strong>{item.loteFijo}</strong> unidades</p>
+                <p>Intervalo Fijo: <strong>{item.intervaloFijo}</strong> días</p>
+              </div>
+            ))}
+            {calculosFiltrados.length === 0 && (
+              <p className="text-gray-400">No se encontraron cálculos.</p>
+            )}
           </div>
         </Modal>
       )}
 
-      {/* Modal Cálculo */}
-      {modalCalculo && (
-        <Modal title="Cálculo Modelo Inventario" onClose={() => setModalCalculo(null)}>
-          <p className="mb-4 text-gray-400">Resultado de cálculo para <strong>{modalCalculo.nombreArticulo}</strong></p>
-          <p>Lote Óptimo: <strong>???</strong></p>
-          <p>Punto de Pedido: <strong>???</strong></p>
-          <p>Stock Seguridad: <strong>{modalCalculo.stock?.stockSeguridad}</strong></p>
+      {/* Modal Stock */}
+      {modalStock && (
+        <Modal title="Manejo de Stock" onClose={() => setModalStock(false)}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const nuevos = [...articulos];
+
+              nuevos.forEach((art, index) => {
+                const stockActual = Number(form[`stockActual_${index}`].value);
+                const stockSeguridad = Number(form[`stockSeguridad_${index}`].value);
+                if (!isNaN(stockActual)) art.stock.stockActual = stockActual;
+                if (!isNaN(stockSeguridad)) art.stock.stockSeguridad = stockSeguridad;
+              });
+
+              if (window.confirm("¿Confirmás los cambios en el stock?")) {
+                setArticulos(nuevos);
+                setModalStock(false);
+              }
+
+            }}
+            className="space-y-4"
+          >
+            <input
+              type="text"
+              placeholder="Buscar artículo por ID o nombre"
+              value={busquedaStock}
+              onChange={(e) => setBusquedaStock(e.target.value)}
+              className="w-full p-2 mb-4 bg-zinc-800 border border-zinc-600 rounded text-white"
+            />
+            {articulosFiltradosStock.map((art, index) => (
+              <div key={art.idArticulo} className="border-b border-zinc-600 pb-2">
+                <h4 className="font-semibold text-white">{art.nombreArticulo}</h4>
+                <div className="flex gap-2">
+                  <input
+                    name={`stockActual_${index}`}
+                    type="number"
+                    min={0}
+                    defaultValue={art.stock?.stockActual || 0}
+                    placeholder="Stock actual"
+                    className="w-1/2 p-2 bg-zinc-800 border border-zinc-600 rounded"
+                  />
+                  <input
+                    name={`stockSeguridad_${index}`}
+                    type="number"
+                    min={0}
+                    defaultValue={art.stock?.stockSeguridad || 0}
+                    placeholder="Stock seguridad"
+                    className="w-1/2 p-2 bg-zinc-800 border border-zinc-600 rounded"
+                  />
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setModalStock(false)} className="bg-zinc-600 px-4 py-2 rounded">
+                Cancelar
+              </button>
+              <button type="submit" className="bg-white text-black px-4 py-2 rounded">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
         </Modal>
       )}
+
     </div>
   );
 }

@@ -1,0 +1,16 @@
+{
+  "modelos": [
+    {
+      "idModeloInventario": 1,
+      "nombreModelo": "EOQ"
+    },
+    {
+      "idModeloInventario": 2,
+      "nombreModelo": "Punto de Pedido"
+    },
+    {
+      "idModeloInventario": 3,
+      "nombreModelo": "Revisión Periódica"
+    }
+  ]
+}

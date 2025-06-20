@@ -1,0 +1,16 @@
+{
+  "calculos": [
+    {
+      "idArticulo": 1,
+      "nombreArticulo": "Monitor LED",
+      "loteFijo": 120,
+      "intervaloFijo": 17
+    },
+    {
+      "idArticulo": 2,
+      "nombreArticulo": "Mouse inalámbrico",
+      "loteFijo": 200,
+      "intervaloFijo": 25
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "proveedores": [
+    {
+      "idProveedor": 1,
+      "nombreProveedor": "Proveedor A"
+    },
+    {
+      "idProveedor": 2,
+      "nombreProveedor": "Proveedor B"
+    },
+    {
+      "idProveedor": 3,
+      "nombreProveedor": "Proveedor C"
+    }
+  ]
+}
