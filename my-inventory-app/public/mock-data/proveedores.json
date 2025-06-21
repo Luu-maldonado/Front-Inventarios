@@ -2,15 +2,28 @@
   "proveedores": [
     {
       "idProveedor": 1,
-      "nombreProveedor": "Proveedor A"
+      "nombreProveedor": "Proveedor A",
+      "tipoProveedor": "General",
+      "articulos": [
+        1,
+        2
+      ]
     },
     {
       "idProveedor": 2,
-      "nombreProveedor": "Proveedor B"
+      "nombreProveedor": "Proveedor B",
+      "tipoProveedor": "Electr\u00f3nica",
+      "articulos": [
+        2
+      ]
     },
     {
       "idProveedor": 3,
-      "nombreProveedor": "Proveedor C"
+      "nombreProveedor": "Proveedor C",
+      "tipoProveedor": "Oficina",
+      "articulos": [
+        1
+      ]
     }
   ]
 }

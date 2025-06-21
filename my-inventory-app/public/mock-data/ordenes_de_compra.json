@@ -1,0 +1,64 @@
+{
+  "ordenesCompra": [
+    {
+      "idOC": 1,
+      "estado": "Pendiente",
+      "idArticulo": 101,
+      "nombreArticulo": "Tóner HP 85A",
+      "cantidad": 5,
+      "proveedor": "Proveedor A",
+      "fecha": "2025-06-10",
+      "tipoCreacion": "automatica",
+      "loteSugerido": 5,
+      "puedeModificar": true
+    },
+    {
+      "idOC": 2,
+      "estado": "Enviada",
+      "idArticulo": 102,
+      "nombreArticulo": "Resma A4 500 hojas",
+      "cantidad": 10,
+      "proveedor": "Proveedor C",
+      "fecha": "2025-06-08",
+      "tipoCreacion": "manual",
+      "loteSugerido": 8,
+      "puedeModificar": false
+    },
+    {
+      "idOC": 3,
+      "estado": "Finalizada",
+      "idArticulo": 103,
+      "nombreArticulo": "Cinta de embalar",
+      "cantidad": 20,
+      "proveedor": "Proveedor B",
+      "fecha": "2025-06-01",
+      "tipoCreacion": "manual",
+      "loteSugerido": 15,
+      "puedeModificar": false
+    },
+    {
+      "idOC": 4,
+      "estado": "Pendiente",
+      "idArticulo": 104,
+      "nombreArticulo": "Lapicera azul BIC",
+      "cantidad": 50,
+      "proveedor": "Proveedor D",
+      "fecha": "2025-06-12",
+      "tipoCreacion": "automatica",
+      "loteSugerido": 40,
+      "puedeModificar": true
+    },
+    {
+      "idOC": 5,
+      "estado": "Cancelada",
+      "idArticulo": 101,
+      "nombreArticulo": "Tóner HP 85A",
+      "cantidad": 6,
+      "proveedor": "Proveedor A",
+      "fecha": "2025-05-28",
+      "tipoCreacion": "manual",
+      "loteSugerido": 5,
+      "puedeModificar": false
+    }
+  ]
+}

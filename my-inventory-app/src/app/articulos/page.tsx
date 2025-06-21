@@ -246,7 +246,7 @@ export default function Articulos() {
             <input name="costoCompra" type="number" placeholder="Costo Compra" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
             <select name="idProveedor" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required>
               <option value="">Seleccionar Proveedor</option>
-              {proveedores.map((p) => (
+              {proveedores?.map((p) => (
                 <option key={p.idProveedor} value={p.idProveedor}>{p.nombreProveedor}</option>
               ))}
             </select>

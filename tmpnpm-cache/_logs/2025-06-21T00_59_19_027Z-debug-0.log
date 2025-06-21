@@ -1,0 +1,354 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.3.0
+2 info using node@v22.14.0
+3 silly config load:file:C:\Users\lucim\AppData\Roaming\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\lucim\Documents\GitHub\Front-Inventarios\.npmrc
+5 silly config load:file:C:\Users\lucim\.npmrc
+6 silly config load:file:C:\Users\lucim\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install @radix-ui/react-dialog
+8 verbose argv "install" "@radix-ui/react-dialog"
+9 verbose logfile logs-max:10 dir:C:\Users\lucim\Documents\GitHub\Front-Inventarios\tmpnpm-cache\_logs\2025-06-21T00_59_19_027Z-
+10 verbose logfile C:\Users\lucim\Documents\GitHub\Front-Inventarios\tmpnpm-cache\_logs\2025-06-21T00_59_19_027Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly fetch manifest @radix-ui/react-dialog@*
+15 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-dialog cache-miss
+16 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+17 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-dialog 327ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-dialog set size:undefined disposed:false
+19 silly fetch manifest @types/react@*
+20 silly packumentCache full:https://registry.npmjs.org/@types%2freact cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/@types%2freact 185ms (cache miss)
+22 silly packumentCache full:https://registry.npmjs.org/@types%2freact set size:undefined disposed:false
+23 silly fetch manifest @types/react-dom@*
+24 silly packumentCache full:https://registry.npmjs.org/@types%2freact-dom cache-miss
+25 http fetch GET 200 https://registry.npmjs.org/@types%2freact-dom 129ms (cache miss)
+26 silly packumentCache full:https://registry.npmjs.org/@types%2freact-dom set size:undefined disposed:false
+27 silly fetch manifest react@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+28 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+29 http fetch GET 200 https://registry.npmjs.org/react 459ms (cache miss)
+30 silly packumentCache full:https://registry.npmjs.org/react set size:undefined disposed:false
+31 silly fetch manifest react-dom@^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+32 silly packumentCache full:https://registry.npmjs.org/react-dom cache-miss
+33 http fetch GET 200 https://registry.npmjs.org/npm 1204ms
+34 http fetch GET 200 https://registry.npmjs.org/react-dom 571ms (cache miss)
+35 silly packumentCache full:https://registry.npmjs.org/react-dom set size:undefined disposed:false
+36 silly placeDep ROOT @radix-ui/react-dialog@1.1.14 OK for:  want: *
+37 silly placeDep ROOT react-dom@19.1.0 OK for: @radix-ui/react-dialog@1.1.14 want: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+38 silly fetch manifest aria-hidden@^1.2.4
+39 silly packumentCache full:https://registry.npmjs.org/aria-hidden cache-miss
+40 silly fetch manifest react-remove-scroll@^2.6.3
+41 silly packumentCache full:https://registry.npmjs.org/react-remove-scroll cache-miss
+42 silly fetch manifest @radix-ui/primitive@1.1.2
+43 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2fprimitive cache-miss
+44 silly fetch manifest @radix-ui/react-compose-refs@1.1.2
+45 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-compose-refs cache-miss
+46 silly fetch manifest @radix-ui/react-context@1.1.2
+47 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-context cache-miss
+48 silly fetch manifest @radix-ui/react-dismissable-layer@1.1.10
+49 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-dismissable-layer cache-miss
+50 silly fetch manifest @radix-ui/react-focus-guards@1.1.2
+51 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-focus-guards cache-miss
+52 http fetch GET 200 https://registry.npmjs.org/aria-hidden 129ms (cache miss)
+53 silly packumentCache full:https://registry.npmjs.org/aria-hidden set size:undefined disposed:false
+54 silly fetch manifest @radix-ui/react-focus-scope@1.1.7
+55 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-focus-scope cache-miss
+56 http fetch GET 200 https://registry.npmjs.org/react-remove-scroll 217ms (cache miss)
+57 silly packumentCache full:https://registry.npmjs.org/react-remove-scroll set size:undefined disposed:false
+58 silly fetch manifest @radix-ui/react-id@1.1.1
+59 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-id cache-miss
+60 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-compose-refs 515ms (cache miss)
+61 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-compose-refs set size:undefined disposed:false
+62 silly fetch manifest @radix-ui/react-portal@1.1.9
+63 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-portal cache-miss
+64 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2fprimitive 550ms (cache miss)
+65 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2fprimitive set size:undefined disposed:false
+66 silly fetch manifest @radix-ui/react-presence@1.1.4
+67 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-presence cache-miss
+68 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-dismissable-layer 788ms (cache miss)
+69 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-dismissable-layer set size:undefined disposed:false
+70 silly fetch manifest @radix-ui/react-primitive@2.1.3
+71 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-primitive cache-miss
+72 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-portal 378ms (cache miss)
+73 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-portal set size:undefined disposed:false
+74 silly fetch manifest @radix-ui/react-slot@1.2.3
+75 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-slot cache-miss
+76 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-primitive 237ms (cache miss)
+77 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-primitive set size:undefined disposed:false
+78 silly fetch manifest @radix-ui/react-use-controllable-state@1.2.2
+79 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-controllable-state cache-miss
+80 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-context 1080ms (cache miss)
+81 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-context set size:undefined disposed:false
+82 silly fetch manifest scheduler@^0.26.0
+83 silly packumentCache full:https://registry.npmjs.org/scheduler cache-miss
+84 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-slot 232ms (cache miss)
+85 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-slot set size:undefined disposed:false
+86 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-presence 597ms (cache miss)
+87 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-presence set size:undefined disposed:false
+88 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-focus-guards 1175ms (cache miss)
+89 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-focus-guards set size:undefined disposed:false
+90 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-focus-scope 1102ms (cache miss)
+91 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-focus-scope set size:undefined disposed:false
+92 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-controllable-state 283ms (cache miss)
+93 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-controllable-state set size:undefined disposed:false
+94 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-id 1553ms (cache miss)
+95 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-id set size:undefined disposed:false
+96 http fetch GET 200 https://registry.npmjs.org/scheduler 733ms (cache miss)
+97 silly packumentCache full:https://registry.npmjs.org/scheduler set size:undefined disposed:false
+98 silly placeDep ROOT @radix-ui/primitive@1.1.2 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.2
+99 silly placeDep ROOT @radix-ui/react-compose-refs@1.1.2 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.2
+100 silly placeDep ROOT @radix-ui/react-context@1.1.2 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.2
+101 silly placeDep ROOT @radix-ui/react-dismissable-layer@1.1.10 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.10
+102 silly placeDep ROOT @radix-ui/react-focus-guards@1.1.2 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.2
+103 silly placeDep ROOT @radix-ui/react-focus-scope@1.1.7 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.7
+104 silly placeDep ROOT @radix-ui/react-id@1.1.1 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.1
+105 silly placeDep ROOT @radix-ui/react-portal@1.1.9 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.9
+106 silly placeDep ROOT @radix-ui/react-presence@1.1.4 OK for: @radix-ui/react-dialog@1.1.14 want: 1.1.4
+107 silly placeDep ROOT @radix-ui/react-primitive@2.1.3 OK for: @radix-ui/react-dialog@1.1.14 want: 2.1.3
+108 silly placeDep ROOT @radix-ui/react-slot@1.2.3 OK for: @radix-ui/react-dialog@1.1.14 want: 1.2.3
+109 silly placeDep ROOT @radix-ui/react-use-controllable-state@1.2.2 OK for: @radix-ui/react-dialog@1.1.14 want: 1.2.2
+110 silly placeDep ROOT aria-hidden@1.2.6 OK for: @radix-ui/react-dialog@1.1.14 want: ^1.2.4
+111 silly placeDep ROOT react-remove-scroll@2.7.1 OK for: @radix-ui/react-dialog@1.1.14 want: ^2.6.3
+112 silly fetch manifest @radix-ui/react-use-callback-ref@1.1.1
+113 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref cache-miss
+114 silly fetch manifest @radix-ui/react-use-escape-keydown@1.1.1
+115 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-escape-keydown cache-miss
+116 silly fetch manifest @radix-ui/react-use-callback-ref@1.1.1
+117 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref cache-miss
+118 silly fetch manifest @radix-ui/react-use-layout-effect@1.1.1
+119 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect cache-miss
+120 silly fetch manifest @radix-ui/react-use-layout-effect@1.1.1
+121 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect cache-miss
+122 silly fetch manifest @radix-ui/react-use-layout-effect@1.1.1
+123 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect cache-miss
+124 silly fetch manifest @radix-ui/react-use-effect-event@0.0.2
+125 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-effect-event cache-miss
+126 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref 168ms (cache miss)
+127 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref set size:undefined disposed:false
+128 silly fetch manifest @radix-ui/react-use-layout-effect@1.1.1
+129 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect cache-miss
+130 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-escape-keydown 196ms (cache miss)
+131 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-escape-keydown set size:undefined disposed:false
+132 silly fetch manifest tslib@^2.0.0
+133 silly packumentCache full:https://registry.npmjs.org/tslib cache-miss
+134 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref 210ms (cache miss)
+135 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-callback-ref set size:undefined disposed:false
+136 silly fetch manifest react-remove-scroll-bar@^2.3.7
+137 silly packumentCache full:https://registry.npmjs.org/react-remove-scroll-bar cache-miss
+138 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-effect-event 275ms (cache miss)
+139 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-effect-event set size:undefined disposed:false
+140 silly fetch manifest react-style-singleton@^2.2.3
+141 silly packumentCache full:https://registry.npmjs.org/react-style-singleton cache-miss
+142 http fetch GET 200 https://registry.npmjs.org/tslib 83ms (cache miss)
+143 silly packumentCache full:https://registry.npmjs.org/tslib set size:undefined disposed:false
+144 silly fetch manifest tslib@^2.1.0
+145 silly packumentCache full:https://registry.npmjs.org/tslib cache-miss
+146 http cache https://registry.npmjs.org/tslib 12ms (cache hit)
+147 silly packumentCache full:https://registry.npmjs.org/tslib set size:108820 disposed:false
+148 silly fetch manifest use-callback-ref@^1.3.3
+149 silly packumentCache full:https://registry.npmjs.org/use-callback-ref cache-miss
+150 http fetch GET 200 https://registry.npmjs.org/react-remove-scroll-bar 188ms (cache miss)
+151 silly packumentCache full:https://registry.npmjs.org/react-remove-scroll-bar set size:undefined disposed:false
+152 silly fetch manifest use-sidecar@^1.1.3
+153 silly packumentCache full:https://registry.npmjs.org/use-sidecar cache-miss
+154 http fetch GET 200 https://registry.npmjs.org/use-sidecar 119ms (cache miss)
+155 silly packumentCache full:https://registry.npmjs.org/use-sidecar set size:undefined disposed:false
+156 http fetch GET 200 https://registry.npmjs.org/use-callback-ref 670ms (cache miss)
+157 silly packumentCache full:https://registry.npmjs.org/use-callback-ref set size:undefined disposed:false
+158 http fetch GET 200 https://registry.npmjs.org/react-style-singleton 707ms (cache miss)
+159 silly packumentCache full:https://registry.npmjs.org/react-style-singleton set size:undefined disposed:false
+160 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect 1001ms (cache miss)
+161 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect set size:undefined disposed:false
+162 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect 1065ms (cache miss)
+163 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect set size:undefined disposed:false
+164 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect 914ms (cache miss)
+165 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect set size:undefined disposed:false
+166 http fetch GET 200 https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect 1714ms (cache miss)
+167 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-use-layout-effect set size:undefined disposed:false
+168 silly placeDep ROOT @radix-ui/react-use-callback-ref@1.1.1 OK for: @radix-ui/react-dismissable-layer@1.1.10 want: 1.1.1
+169 silly placeDep ROOT @radix-ui/react-use-escape-keydown@1.1.1 OK for: @radix-ui/react-dismissable-layer@1.1.10 want: 1.1.1
+170 silly placeDep ROOT @radix-ui/react-use-layout-effect@1.1.1 OK for: @radix-ui/react-id@1.1.1 want: 1.1.1
+171 silly placeDep ROOT @radix-ui/react-use-effect-event@0.0.2 OK for: @radix-ui/react-use-controllable-state@1.2.2 want: 0.0.2
+172 silly placeDep ROOT tslib@2.8.1 OK for: aria-hidden@1.2.6 want: ^2.0.0
+173 silly placeDep ROOT scheduler@0.26.0 OK for: react-dom@19.1.0 want: ^0.26.0
+174 silly fetch manifest react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+175 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+176 http cache https://registry.npmjs.org/react 14ms (cache hit)
+177 silly packumentCache full:https://registry.npmjs.org/react set size:5788151 disposed:false
+178 silly placeDep ROOT react-remove-scroll-bar@2.3.8 OK for: react-remove-scroll@2.7.1 want: ^2.3.7
+179 silly placeDep ROOT react-style-singleton@2.2.3 OK for: react-remove-scroll@2.7.1 want: ^2.2.3
+180 silly placeDep ROOT use-callback-ref@1.3.3 OK for: react-remove-scroll@2.7.1 want: ^1.3.3
+181 silly placeDep ROOT use-sidecar@1.1.3 OK for: react-remove-scroll@2.7.1 want: ^1.1.3
+182 silly fetch manifest react-style-singleton@^2.2.2
+183 silly packumentCache full:https://registry.npmjs.org/react-style-singleton cache-miss
+184 silly fetch manifest get-nonce@^1.0.0
+185 silly packumentCache full:https://registry.npmjs.org/get-nonce cache-miss
+186 silly fetch manifest detect-node-es@^1.1.0
+187 silly packumentCache full:https://registry.npmjs.org/detect-node-es cache-miss
+188 http cache https://registry.npmjs.org/react-style-singleton 10ms (cache hit)
+189 silly packumentCache full:https://registry.npmjs.org/react-style-singleton set size:33682 disposed:false
+190 http fetch GET 200 https://registry.npmjs.org/get-nonce 102ms (cache miss)
+191 silly packumentCache full:https://registry.npmjs.org/get-nonce set size:undefined disposed:false
+192 http fetch GET 200 https://registry.npmjs.org/detect-node-es 114ms (cache miss)
+193 silly packumentCache full:https://registry.npmjs.org/detect-node-es set size:undefined disposed:false
+194 silly placeDep ROOT get-nonce@1.0.1 OK for: react-style-singleton@2.2.3 want: ^1.0.0
+195 silly placeDep ROOT detect-node-es@1.1.0 OK for: use-sidecar@1.1.3 want: ^1.1.0
+196 silly reify moves {}
+197 silly audit bulk request {
+197 silly audit   react: [ '19.1.0' ],
+197 silly audit   'react-icons': [ '5.5.0' ],
+197 silly audit   '@radix-ui/react-dialog': [ '1.1.14' ],
+197 silly audit   'react-dom': [ '19.1.0' ],
+197 silly audit   '@radix-ui/primitive': [ '1.1.2' ],
+197 silly audit   '@radix-ui/react-compose-refs': [ '1.1.2' ],
+197 silly audit   '@radix-ui/react-context': [ '1.1.2' ],
+197 silly audit   '@radix-ui/react-dismissable-layer': [ '1.1.10' ],
+197 silly audit   '@radix-ui/react-focus-guards': [ '1.1.2' ],
+197 silly audit   '@radix-ui/react-focus-scope': [ '1.1.7' ],
+197 silly audit   '@radix-ui/react-id': [ '1.1.1' ],
+197 silly audit   '@radix-ui/react-portal': [ '1.1.9' ],
+197 silly audit   '@radix-ui/react-presence': [ '1.1.4' ],
+197 silly audit   '@radix-ui/react-primitive': [ '2.1.3' ],
+197 silly audit   '@radix-ui/react-slot': [ '1.2.3' ],
+197 silly audit   '@radix-ui/react-use-controllable-state': [ '1.2.2' ],
+197 silly audit   'aria-hidden': [ '1.2.6' ],
+197 silly audit   'react-remove-scroll': [ '2.7.1' ],
+197 silly audit   '@radix-ui/react-use-callback-ref': [ '1.1.1' ],
+197 silly audit   '@radix-ui/react-use-escape-keydown': [ '1.1.1' ],
+197 silly audit   '@radix-ui/react-use-layout-effect': [ '1.1.1' ],
+197 silly audit   '@radix-ui/react-use-effect-event': [ '0.0.2' ],
+197 silly audit   tslib: [ '2.8.1' ],
+197 silly audit   scheduler: [ '0.26.0' ],
+197 silly audit   'react-remove-scroll-bar': [ '2.3.8' ],
+197 silly audit   'react-style-singleton': [ '2.2.3' ],
+197 silly audit   'use-callback-ref': [ '1.3.3' ],
+197 silly audit   'use-sidecar': [ '1.1.3' ],
+197 silly audit   'get-nonce': [ '1.0.1' ],
+197 silly audit   'detect-node-es': [ '1.1.0' ]
+197 silly audit }
+198 http cache get-nonce@https://registry.npmjs.org/get-nonce/-/get-nonce-1.0.1.tgz 0ms (cache hit)
+199 http cache detect-node-es@https://registry.npmjs.org/detect-node-es/-/detect-node-es-1.1.0.tgz 0ms (cache hit)
+200 http cache use-callback-ref@https://registry.npmjs.org/use-callback-ref/-/use-callback-ref-1.3.3.tgz 0ms (cache hit)
+201 http cache react-style-singleton@https://registry.npmjs.org/react-style-singleton/-/react-style-singleton-2.2.3.tgz 0ms (cache hit)
+202 http cache react-remove-scroll-bar@https://registry.npmjs.org/react-remove-scroll-bar/-/react-remove-scroll-bar-2.3.8.tgz 0ms (cache hit)
+203 http cache scheduler@https://registry.npmjs.org/scheduler/-/scheduler-0.26.0.tgz 0ms (cache hit)
+204 http cache use-sidecar@https://registry.npmjs.org/use-sidecar/-/use-sidecar-1.1.3.tgz 0ms (cache hit)
+205 http cache tslib@https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz 0ms (cache hit)
+206 http cache @radix-ui/react-use-effect-event@https://registry.npmjs.org/@radix-ui/react-use-effect-event/-/react-use-effect-event-0.0.2.tgz 0ms (cache hit)
+207 http cache aria-hidden@https://registry.npmjs.org/aria-hidden/-/aria-hidden-1.2.6.tgz 0ms (cache hit)
+208 http cache @radix-ui/react-use-escape-keydown@https://registry.npmjs.org/@radix-ui/react-use-escape-keydown/-/react-use-escape-keydown-1.1.1.tgz 0ms (cache hit)
+209 http cache react-remove-scroll@https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.1.tgz 0ms (cache hit)
+210 http cache @radix-ui/react-use-callback-ref@https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.1.1.tgz 0ms (cache hit)
+211 http cache @radix-ui/react-slot@https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.2.3.tgz 0ms (cache hit)
+212 http cache @radix-ui/react-use-layout-effect@https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.1.1.tgz 0ms (cache hit)
+213 http cache @radix-ui/react-use-controllable-state@https://registry.npmjs.org/@radix-ui/react-use-controllable-state/-/react-use-controllable-state-1.2.2.tgz 0ms (cache hit)
+214 http cache @radix-ui/react-presence@https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-1.1.4.tgz 0ms (cache hit)
+215 http cache @radix-ui/react-primitive@https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-2.1.3.tgz 0ms (cache hit)
+216 http cache @radix-ui/react-portal@https://registry.npmjs.org/@radix-ui/react-portal/-/react-portal-1.1.9.tgz 0ms (cache hit)
+217 http cache @radix-ui/react-id@https://registry.npmjs.org/@radix-ui/react-id/-/react-id-1.1.1.tgz 0ms (cache hit)
+218 http cache @radix-ui/react-focus-scope@https://registry.npmjs.org/@radix-ui/react-focus-scope/-/react-focus-scope-1.1.7.tgz 0ms (cache hit)
+219 http cache @radix-ui/react-focus-guards@https://registry.npmjs.org/@radix-ui/react-focus-guards/-/react-focus-guards-1.1.2.tgz 0ms (cache hit)
+220 http cache @radix-ui/react-dismissable-layer@https://registry.npmjs.org/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.1.10.tgz 0ms (cache hit)
+221 http cache @radix-ui/react-context@https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.1.2.tgz 0ms (cache hit)
+222 http cache react-dom@https://registry.npmjs.org/react-dom/-/react-dom-19.1.0.tgz 0ms (cache hit)
+223 silly tarball no local data for get-nonce@https://registry.npmjs.org/get-nonce/-/get-nonce-1.0.1.tgz. Extracting by manifest.
+224 silly tarball no local data for detect-node-es@https://registry.npmjs.org/detect-node-es/-/detect-node-es-1.1.0.tgz. Extracting by manifest.
+225 http cache @radix-ui/react-compose-refs@https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.2.tgz 0ms (cache hit)
+226 silly tarball no local data for use-callback-ref@https://registry.npmjs.org/use-callback-ref/-/use-callback-ref-1.3.3.tgz. Extracting by manifest.
+227 http cache @radix-ui/primitive@https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.1.2.tgz 0ms (cache hit)
+228 http cache @radix-ui/react-dialog@https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.14.tgz 0ms (cache hit)
+229 silly tarball no local data for react-style-singleton@https://registry.npmjs.org/react-style-singleton/-/react-style-singleton-2.2.3.tgz. Extracting by manifest.
+230 silly tarball no local data for react-remove-scroll-bar@https://registry.npmjs.org/react-remove-scroll-bar/-/react-remove-scroll-bar-2.3.8.tgz. Extracting by manifest.
+231 silly tarball no local data for scheduler@https://registry.npmjs.org/scheduler/-/scheduler-0.26.0.tgz. Extracting by manifest.
+232 silly tarball no local data for use-sidecar@https://registry.npmjs.org/use-sidecar/-/use-sidecar-1.1.3.tgz. Extracting by manifest.
+233 silly tarball no local data for tslib@https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz. Extracting by manifest.
+234 silly tarball no local data for @radix-ui/react-use-effect-event@https://registry.npmjs.org/@radix-ui/react-use-effect-event/-/react-use-effect-event-0.0.2.tgz. Extracting by manifest.
+235 silly tarball no local data for aria-hidden@https://registry.npmjs.org/aria-hidden/-/aria-hidden-1.2.6.tgz. Extracting by manifest.
+236 silly tarball no local data for @radix-ui/react-use-escape-keydown@https://registry.npmjs.org/@radix-ui/react-use-escape-keydown/-/react-use-escape-keydown-1.1.1.tgz. Extracting by manifest.
+237 silly tarball no local data for react-remove-scroll@https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.1.tgz. Extracting by manifest.
+238 silly tarball no local data for @radix-ui/react-use-callback-ref@https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.1.1.tgz. Extracting by manifest.
+239 silly tarball no local data for @radix-ui/react-slot@https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.2.3.tgz. Extracting by manifest.
+240 silly tarball no local data for @radix-ui/react-use-layout-effect@https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.1.1.tgz. Extracting by manifest.
+241 silly tarball no local data for @radix-ui/react-use-controllable-state@https://registry.npmjs.org/@radix-ui/react-use-controllable-state/-/react-use-controllable-state-1.2.2.tgz. Extracting by manifest.
+242 silly tarball no local data for @radix-ui/react-presence@https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-1.1.4.tgz. Extracting by manifest.
+243 silly tarball no local data for @radix-ui/react-primitive@https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-2.1.3.tgz. Extracting by manifest.
+244 silly tarball no local data for @radix-ui/react-portal@https://registry.npmjs.org/@radix-ui/react-portal/-/react-portal-1.1.9.tgz. Extracting by manifest.
+245 silly tarball no local data for @radix-ui/react-id@https://registry.npmjs.org/@radix-ui/react-id/-/react-id-1.1.1.tgz. Extracting by manifest.
+246 silly tarball no local data for @radix-ui/react-focus-scope@https://registry.npmjs.org/@radix-ui/react-focus-scope/-/react-focus-scope-1.1.7.tgz. Extracting by manifest.
+247 silly tarball no local data for @radix-ui/react-focus-guards@https://registry.npmjs.org/@radix-ui/react-focus-guards/-/react-focus-guards-1.1.2.tgz. Extracting by manifest.
+248 silly tarball no local data for @radix-ui/react-dismissable-layer@https://registry.npmjs.org/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.1.10.tgz. Extracting by manifest.
+249 silly tarball no local data for @radix-ui/react-context@https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.1.2.tgz. Extracting by manifest.
+250 silly tarball no local data for react-dom@https://registry.npmjs.org/react-dom/-/react-dom-19.1.0.tgz. Extracting by manifest.
+251 silly tarball no local data for @radix-ui/react-compose-refs@https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.2.tgz. Extracting by manifest.
+252 silly tarball no local data for @radix-ui/primitive@https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.1.2.tgz. Extracting by manifest.
+253 silly tarball no local data for @radix-ui/react-dialog@https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.14.tgz. Extracting by manifest.
+254 http fetch GET 200 https://registry.npmjs.org/detect-node-es/-/detect-node-es-1.1.0.tgz 102ms (cache miss)
+255 http fetch GET 200 https://registry.npmjs.org/use-callback-ref/-/use-callback-ref-1.3.3.tgz 103ms (cache miss)
+256 http fetch GET 200 https://registry.npmjs.org/scheduler/-/scheduler-0.26.0.tgz 102ms (cache miss)
+257 http fetch GET 200 https://registry.npmjs.org/react-remove-scroll-bar/-/react-remove-scroll-bar-2.3.8.tgz 103ms (cache miss)
+258 http fetch GET 200 https://registry.npmjs.org/get-nonce/-/get-nonce-1.0.1.tgz 113ms (cache miss)
+259 http fetch GET 200 https://registry.npmjs.org/react-style-singleton/-/react-style-singleton-2.2.3.tgz 133ms (cache miss)
+260 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.1.1.tgz 174ms (cache miss)
+261 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-2.1.3.tgz 175ms (cache miss)
+262 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.2.3.tgz 213ms (cache miss)
+263 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-1.1.4.tgz 217ms (cache miss)
+264 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-focus-scope/-/react-focus-scope-1.1.7.tgz 222ms (cache miss)
+265 http fetch GET 200 https://registry.npmjs.org/aria-hidden/-/aria-hidden-1.2.6.tgz 239ms (cache miss)
+266 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.1.1.tgz 240ms (cache miss)
+267 http fetch GET 200 https://registry.npmjs.org/react-remove-scroll/-/react-remove-scroll-2.7.1.tgz 248ms (cache miss)
+268 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-focus-guards/-/react-focus-guards-1.1.2.tgz 254ms (cache miss)
+269 http fetch GET 200 https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz 290ms (cache miss)
+270 http fetch GET 200 https://registry.npmjs.org/use-sidecar/-/use-sidecar-1.1.3.tgz 307ms (cache miss)
+271 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.1.2.tgz 374ms (cache miss)
+272 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.1.2.tgz 422ms (cache miss)
+273 http fetch GET 200 https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.1.2.tgz 420ms (cache miss)
+274 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-use-escape-keydown/-/react-use-escape-keydown-1.1.1.tgz 425ms (cache miss)
+275 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-use-controllable-state/-/react-use-controllable-state-1.2.2.tgz 451ms (cache miss)
+276 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-portal/-/react-portal-1.1.9.tgz 451ms (cache miss)
+277 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-id/-/react-id-1.1.1.tgz 477ms (cache miss)
+278 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.1.10.tgz 525ms (cache miss)
+279 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-use-effect-event/-/react-use-effect-event-0.0.2.tgz 529ms (cache miss)
+280 http fetch GET 200 https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.14.tgz 594ms (cache miss)
+281 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 690ms
+282 silly audit report {}
+283 http fetch GET 200 https://registry.npmjs.org/react-dom/-/react-dom-19.1.0.tgz 749ms (cache miss)
+284 silly ADD node_modules/detect-node-es
+285 silly ADD node_modules/get-nonce
+286 silly ADD node_modules/use-sidecar
+287 silly ADD node_modules/use-callback-ref
+288 silly ADD node_modules/react-style-singleton
+289 silly ADD node_modules/react-remove-scroll-bar
+290 silly ADD node_modules/scheduler
+291 silly ADD node_modules/tslib
+292 silly ADD node_modules/@radix-ui/react-use-effect-event
+293 silly ADD node_modules/@radix-ui/react-use-layout-effect
+294 silly ADD node_modules/@radix-ui/react-use-escape-keydown
+295 silly ADD node_modules/@radix-ui/react-use-callback-ref
+296 silly ADD node_modules/react-remove-scroll
+297 silly ADD node_modules/aria-hidden
+298 silly ADD node_modules/@radix-ui/react-use-controllable-state
+299 silly ADD node_modules/@radix-ui/react-slot
+300 silly ADD node_modules/@radix-ui/react-primitive
+301 silly ADD node_modules/@radix-ui/react-presence
+302 silly ADD node_modules/@radix-ui/react-portal
+303 silly ADD node_modules/@radix-ui/react-id
+304 silly ADD node_modules/@radix-ui/react-focus-scope
+305 silly ADD node_modules/@radix-ui/react-focus-guards
+306 silly ADD node_modules/@radix-ui/react-dismissable-layer
+307 silly ADD node_modules/@radix-ui/react-context
+308 silly ADD node_modules/@radix-ui/react-compose-refs
+309 silly ADD node_modules/@radix-ui/primitive
+310 silly ADD node_modules/react-dom
+311 silly ADD node_modules/@radix-ui/react-dialog
+312 verbose cwd C:\Users\lucim\Documents\GitHub\Front-Inventarios
+313 verbose os Windows_NT 10.0.26100
+314 verbose node v22.14.0
+315 verbose npm  v11.3.0
+316 notice
+316 notice New [33mminor[39m version of npm available! [33m11.3.0[39m -> [34m11.4.2[39m
+316 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.4.2[39m
+316 notice To update run: [4mnpm install -g npm@11.4.2[24m
+316 notice  { force: true, [Symbol(proc-log.meta)]: true }
+317 verbose exit 0
+318 info ok
