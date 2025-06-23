@@ -2,13 +2,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaUserTie, FaTrashAlt, FaEdit} from "react-icons/fa";
+import { FaUserTie, FaTrashAlt, FaEdit } from "react-icons/fa";
 import Modal from "@/app/components/Modal";
 
 interface Proveedor {
   idProveedor: number;
   nombreProveedor: string;
-  tipoProveedor: string;
+  direccion?: string;
+  mail?: string;
+  telefono?: string;
+  masterArticulo?: number;
   articulos: number[];
 }
 
@@ -24,15 +27,26 @@ export default function Proveedores() {
   const [filtroArticulo, setFiltroArticulo] = useState("");
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+
 
   useEffect(() => {
-    fetch("/mock-data/proveedores.json")
+    fetch("http://localhost:5000/Proveedor/activos")
       .then((res) => res.json())
-      .then((data) => setProveedores(data.proveedores));
-
-    fetch("/mock-data/lista_de_articulos.json")
-      .then((res) => res.json())
-      .then((data) => setArticulos(data.articulos));
+      .then((data) => {
+        console.log("Proveedores desde el back:", data);
+        const proveedoresAdaptados = data.map((prov: any) => ({
+          idProveedor: prov.idProveedor,
+          nombreProveedor: prov.nombreProveedor,
+          direccion: prov.direccion,
+          mail: prov.mail,
+          telefono: prov.telefono,
+          masterArticulo: prov.masterArticulo,
+          articulos: [],
+        }));
+        setProveedores(proveedoresAdaptados);
+      })
+      .catch((err) => console.error("Error cargando proveedores:", err));
   }, []);
 
   const proveedoresFiltrados = proveedores.filter((p) =>
@@ -40,18 +54,33 @@ export default function Proveedores() {
     p.idProveedor.toString().includes(filtro)
   );
 
-  const toggleArticulo = (idArticulo: number) => {
-    if (!proveedorSeleccionado) return;
-    const yaTiene = proveedorSeleccionado.articulos.includes(idArticulo);
-    const nuevos = yaTiene
-      ? proveedorSeleccionado.articulos.filter((id) => id !== idArticulo)
-      : [...proveedorSeleccionado.articulos, idArticulo];
-    setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevos });
-  };
+  useEffect(() => {
+    fetch("http://localhost:5000/MaestroArticulos/articulos/list-art-datos")
+      .then((res) => res.json())
+      .then((data) => {
+        const articulosAdaptados = data.map((art: any) => ({
+          idArticulo: art.idArticulo,
+          nombreArticulo: art.nombreArticulo,
+        }));
+        setArticulos(articulosAdaptados);
+      })
+      .catch((err) => console.error("Error cargando artículos:", err));
+  }, []);
 
   const articulosFiltrados = articulos.filter((art) =>
     art.nombreArticulo.toLowerCase().includes(filtroArticulo.toLowerCase())
   );
+
+  const toggleArticulo = (idArticulo: number) => {
+  if (!proveedorSeleccionado) return;
+
+  const yaSeleccionado = proveedorSeleccionado.articulos.includes(idArticulo);
+  const nuevosArticulos = yaSeleccionado
+    ? proveedorSeleccionado.articulos.filter((id) => id !== idArticulo)
+    : [...proveedorSeleccionado.articulos, idArticulo];
+
+  setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevosArticulos });
+};
 
   return (
     <div className="text-white mt-12 mx-6">
@@ -66,7 +95,7 @@ export default function Proveedores() {
         />
         <button
           onClick={() => {
-            setProveedorSeleccionado({ idProveedor: Date.now(), nombreProveedor: "", tipoProveedor: "", articulos: [] });
+            setProveedorSeleccionado({ idProveedor: 0, nombreProveedor: "", direccion: "", mail: "", telefono: "", articulos: [] });
             setModalAbierto(true);
           }}
           className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90"
@@ -89,16 +118,29 @@ export default function Proveedores() {
                 <button
                   onClick={() => {
                     setProveedorSeleccionado(prov);
-                    setModalAbierto(true);
+                    setModalEditarAbierto(true);
                   }}
                   className="text-blue-500 hover:text-blue-400"
                 >
                   <FaEdit />
                 </button>
                 <button
-                  onClick={() => {
-                    if (confirm("¿Estás seguro de que querés eliminar este proveedor?")) {
+                  onClick={async () => {
+                    const confirmar = confirm("¿Estás seguro de que querés eliminar este proveedor?");
+                    if (!confirmar) return;
+
+                    try {
+                      const res = await fetch(`http://localhost:5000/Proveedor/eliminar/${prov.idProveedor}`, {
+                        method: "DELETE",
+                      });
+
+                      if (!res.ok) throw new Error("Error al eliminar proveedor");
+
+                      alert("Proveedor eliminado correctamente");
                       setProveedores((prev) => prev.filter((p) => p.idProveedor !== prov.idProveedor));
+                    } catch (err) {
+                      console.error("Error al eliminar proveedor:", err);
+                      alert("Ocurrió un error al eliminar el proveedor");
                     }
                   }}
                   className="text-red-500 hover:text-red-400"
@@ -108,8 +150,9 @@ export default function Proveedores() {
               </div>
             </div>
             <p className="text-zinc-400 text-sm mt-1">ID: {prov.idProveedor}</p>
-            <p className="text-zinc-400 text-sm">Tipo: {prov.tipoProveedor}</p>
-            <p className="text-zinc-400 text-sm mt-2">Artículos: {prov.articulos.length}</p>
+            {prov.direccion && <p className="text-zinc-400 text-sm">Dirección: {prov.direccion}</p>}
+            {prov.mail && <p className="text-zinc-400 text-sm">Email: {prov.mail}</p>}
+            {prov.telefono && <p className="text-zinc-400 text-sm">Teléfono: {prov.telefono}</p>}
           </div>
         ))}
       </div>
@@ -120,7 +163,7 @@ export default function Proveedores() {
           setProveedorSeleccionado(null);
         }}>
           <div className="text-white p-4">
-            <h2 className="text-xl font-bold mb-4">Editar Proveedor</h2>
+            <h2 className="text-xl font-bold mb-4">Agregar Proveedor</h2>
             <input
               placeholder="Nombre del proveedor"
               className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
@@ -130,11 +173,27 @@ export default function Proveedores() {
               }
             />
             <input
-              placeholder="Tipo de proveedor"
+              placeholder="Dirección"
               className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-              value={proveedorSeleccionado.tipoProveedor}
+              value={proveedorSeleccionado.direccion}
               onChange={(e) =>
-                setProveedorSeleccionado({ ...proveedorSeleccionado, tipoProveedor: e.target.value })
+                setProveedorSeleccionado({ ...proveedorSeleccionado, direccion: e.target.value })
+              }
+            />
+            <input
+              placeholder="Email"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.mail}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, mail: e.target.value })
+              }
+            />
+            <input
+              placeholder="Teléfono"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.telefono}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, telefono: e.target.value })
               }
             />
             <h3 className="font-semibold mt-2 mb-1">Filtrar artículos:</h3>
@@ -169,24 +228,49 @@ export default function Proveedores() {
               </button>
               <button
                 className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
-                onClick={() => {
-                  if (proveedorSeleccionado.articulos.length === 0) {
+                onClick={async () => {
+                  if (!proveedorSeleccionado || proveedorSeleccionado.articulos.length === 0) {
                     alert("Debe seleccionar al menos un artículo");
                     return;
                   }
+
                   const confirmar = confirm("¿Deseás guardar los cambios del proveedor?");
                   if (!confirmar) return;
 
-                  const index = proveedores.findIndex((p) => p.idProveedor === proveedorSeleccionado.idProveedor);
-                  const nuevos = [...proveedores];
-                  if (index >= 0) {
-                    nuevos[index] = proveedorSeleccionado;
-                  } else {
-                    nuevos.push(proveedorSeleccionado);
+                  const body = {
+                    proveedor: {
+                      nombreProveedor: proveedorSeleccionado.nombreProveedor,
+                      direccion: proveedorSeleccionado.direccion,
+                      mail: proveedorSeleccionado.mail,
+                      telefono: proveedorSeleccionado.telefono,
+                      masterArticulo: proveedorSeleccionado.masterArticulo,
+                    },
+                    articulos: proveedorSeleccionado.articulos.map((id) => ({
+                      idArticulo: id,
+                      precioUnitario: 100.0,
+                      tiempoEntregaDias: 30,
+                      fechaFinProveedorArticulo: null,
+                      costoPedido: 0,
+                    })),
+                  };
+
+                  try {
+                    const res = await fetch("http://localhost:5000/Proveedor/crea-prov-art", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                    });
+
+                    if (!res.ok) throw new Error("Error en la creación");
+
+                    alert("Proveedor creado correctamente");
+                    setModalAbierto(false);
+                    setProveedorSeleccionado(null);
+                    // podés actualizar la lista si querés
+                  } catch (err) {
+                    console.error("Error al crear proveedor:", err);
+                    alert("Ocurrió un error al crear el proveedor");
                   }
-                  setProveedores(nuevos);
-                  setModalAbierto(false);
-                  setProveedorSeleccionado(null);
                 }}
               >
                 Guardar
@@ -195,6 +279,95 @@ export default function Proveedores() {
           </div>
         </Modal>
       )}
+
+      {modalEditarAbierto && proveedorSeleccionado && (
+        <Modal open={modalEditarAbierto} onClose={() => {
+          setModalEditarAbierto(false);
+          setProveedorSeleccionado(null);
+        }}>
+          <div className="text-white p-4">
+            <h2 className="text-xl font-bold mb-4">Editar Proveedor</h2>
+
+            <input
+              placeholder="Nombre del proveedor"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.nombreProveedor}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, nombreProveedor: e.target.value })
+              }
+            />
+            <input
+              placeholder="Dirección"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.direccion}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, direccion: e.target.value })
+              }
+            />
+            <input
+              placeholder="Email"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.mail}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, mail: e.target.value })
+              }
+            />
+            <input
+              placeholder="Teléfono"
+              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+              value={proveedorSeleccionado.telefono}
+              onChange={(e) =>
+                setProveedorSeleccionado({ ...proveedorSeleccionado, telefono: e.target.value })
+              }
+            />
+
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
+                onClick={() => {
+                  setModalEditarAbierto(false);
+                  setProveedorSeleccionado(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700"
+                onClick={async () => {
+                  const confirmar = confirm("¿Deseás guardar los cambios?");
+                  if (!confirmar) return;
+
+                  try {
+                    const res = await fetch(`http://localhost:5000/Proveedor/actualizar/${proveedorSeleccionado.idProveedor}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        nombreProveedor: proveedorSeleccionado.nombreProveedor,
+                        direccion: proveedorSeleccionado.direccion,
+                        mail: proveedorSeleccionado.mail,
+                        telefono: proveedorSeleccionado.telefono,
+                      }),
+                    });
+
+                    if (!res.ok) throw new Error("Error al actualizar proveedor");
+
+                    alert("Proveedor actualizado correctamente");
+                    setModalEditarAbierto(false);
+                    setProveedorSeleccionado(null);
+                    window.location.reload(); // o actualizá la lista localmente si preferís
+                  } catch (err) {
+                    console.error("Error al actualizar proveedor:", err);
+                    alert("Ocurrió un error al actualizar el proveedor");
+                  }
+                }}
+              >
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
     </div>
   );
 }
