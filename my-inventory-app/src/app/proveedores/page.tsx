@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaUserTie, FaTrashAlt, FaEdit,FaCogs } from "react-icons/fa";
+import { FaUserTie, FaTrashAlt, FaEdit, FaCogs } from "react-icons/fa";
 import Modal from "@/app/components/Modal";
 
 interface Proveedor {
@@ -38,8 +38,7 @@ export default function Proveedores() {
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
   const [modalRelacionAbierto, setModalRelacionAbierto] = useState(false);
   const [relacionesProveedor, setRelacionesProveedor] = useState<RelacionArticulo[]>([]);
-
-
+  const [nuevasRelaciones, setNuevasRelaciones] = useState<{ idArticulo: number; nombreArticulo: string; precioUnitario: number; tiempoEntregaDias: number; costoPedido: number; }[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/Proveedor/activos")
@@ -82,7 +81,7 @@ export default function Proveedores() {
     art.nombreArticulo.toLowerCase().includes(filtroArticulo.toLowerCase())
   );
 
-  const toggleArticulo = (idArticulo: number) => {
+  {/*const toggleArticulo = (idArticulo: number) => {
     if (!proveedorSeleccionado) return;
 
     const yaSeleccionado = proveedorSeleccionado.articulos.includes(idArticulo);
@@ -91,7 +90,39 @@ export default function Proveedores() {
       : [...proveedorSeleccionado.articulos, idArticulo];
 
     setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevosArticulos });
-  };
+  };*/}
+  {/*const abrirModalRelacion = async (proveedor: Proveedor) => {
+    try {
+      const res = await fetch(`http://localhost:5000/ProveedorArticulo/por-proveedor/${proveedor.idProveedor}`);
+      if (!res.ok) throw new Error("Error al cargar relaciones");
+
+      const data: {
+        idArticulo: number;
+        precioUnitario: number;
+        tiempoEntregaDias: number;
+        costoPedido: number;
+      }[] = await res.json();
+
+      const relaciones: RelacionArticulo[] = data.map((r) => {
+        const articulo = articulos.find((a: Articulo) => a.idArticulo === r.idArticulo);
+        return {
+          idArticulo: r.idArticulo,
+          nombreArticulo: articulo?.nombreArticulo || "Artículo sin nombre",
+          precioUnitario: r.precioUnitario,
+          tiempoEntregaDias: r.tiempoEntregaDias,
+          costoPedido: r.costoPedido,
+        };
+      });
+
+      setProveedorSeleccionado(proveedor);
+      setRelacionesProveedor(relaciones);
+      setModalRelacionAbierto(true);
+    } catch (err) {
+      console.error("Error al abrir modal de relación:", err);
+      alert("No se pudo cargar la relación proveedor-artículos");
+    }
+  };*/}
+
 
   return (
     <div className="text-white mt-12 mx-6">
@@ -159,26 +190,40 @@ export default function Proveedores() {
                   <FaTrashAlt />
                 </button>
                 <button
-                  onClick={() => {
-                    setProveedorSeleccionado({ ...prov, articulos: prov.articulos || [] });
-                    setRelacionesProveedor(
-                      articulos
-                      .filter((a) => prov.articulos.includes(a.idArticulo))
-                      .map((a) => ({
-                        idArticulo: a.idArticulo,
-                        nombreArticulo: a.nombreArticulo,
-                        precioUnitario: 0,
-                        tiempoEntregaDias: 0,
-                        costoPedido: 0,
-                      }))
-                    );
-                    setModalRelacionAbierto(true);
+                  onClick={async () => {
+                    const proveedorConArticulos = { ...prov, articulos: prov.articulos || [] };
+
+                    try {
+                      const res = await fetch(`http://localhost:5000/Proveedor/articulos-proveedor/${prov.idProveedor}`);
+                      if (!res.ok) throw new Error("Error al traer relaciones proveedor-artículo");
+
+                      const data = await res.json();
+
+                      // Enlazamos los datos con nombreArticulo a partir del listado global `articulos`
+                      const relacionesConNombre = data.map((rel) => {
+                        const art = articulos.find((a) => a.idArticulo === rel.idArticulo);
+                        return {
+                          ...rel,
+                          nombreArticulo: art?.nombreArticulo || "Artículo sin nombre",
+                        };
+                      });
+
+                      setProveedorSeleccionado(proveedorConArticulos);
+                      setRelacionesProveedor(relacionesConNombre);
+                      setModalRelacionAbierto(true);
+
+                    } catch (err) {
+                      console.error("Error al cargar relaciones proveedor-artículo", err);
+                      alert("Ocurrió un error al cargar las relaciones");
+                    }
                   }}
                   className="text-yellow-400 hover:text-yellow-300"
                   title="Editar relación proveedor-artículos"
                 >
                   <FaCogs />
                 </button>
+
+
 
               </div>
             </div>
@@ -189,131 +234,235 @@ export default function Proveedores() {
           </div>
         ))}
       </div>
-
+      {/* Modal crear proveedor*/}
       {proveedorSeleccionado && (
-        <Modal open={modalAbierto} onClose={() => {
-          setModalAbierto(false);
-          setProveedorSeleccionado(null);
-        }}>
+        <Modal
+          open={modalAbierto}
+          onClose={() => {
+            setModalAbierto(false);
+            setProveedorSeleccionado({
+              idProveedor: 0,
+              nombreProveedor: "",
+              direccion: "",
+              mail: "",
+              telefono: "",
+              articulos: [],
+            });
+            setRelacionesProveedor([]);
+          }}
+        >
           <div className="max-h-[80vh] overflow-y-auto p-4">
-          <div className="text-white p-4">
-            <h2 className="text-xl font-bold mb-4">Agregar Proveedor</h2>
-            <input
-              placeholder="Nombre del proveedor"
-              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-              value={proveedorSeleccionado.nombreProveedor}
-              onChange={(e) =>
-                setProveedorSeleccionado({ ...proveedorSeleccionado, nombreProveedor: e.target.value })
-              }
-            />
-            <input
-              placeholder="Dirección"
-              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-              value={proveedorSeleccionado.direccion}
-              onChange={(e) =>
-                setProveedorSeleccionado({ ...proveedorSeleccionado, direccion: e.target.value })
-              }
-            />
-            <input
-              placeholder="Email"
-              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-              value={proveedorSeleccionado.mail}
-              onChange={(e) =>
-                setProveedorSeleccionado({ ...proveedorSeleccionado, mail: e.target.value })
-              }
-            />
-            <input
-              placeholder="Teléfono"
-              className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-              value={proveedorSeleccionado.telefono}
-              onChange={(e) =>
-                setProveedorSeleccionado({ ...proveedorSeleccionado, telefono: e.target.value })
-              }
-            />
-            <h3 className="font-semibold mt-2 mb-1">Filtrar artículos:</h3>
-            <input
-              placeholder="Buscar artículo"
-              className="w-full px-3 py-2 mb-2 rounded-md bg-zinc-800 border border-zinc-600"
-              value={filtroArticulo}
-              onChange={(e) => setFiltroArticulo(e.target.value)}
-            />
-            <h3 className="font-semibold mt-2">Seleccioná los artículos:</h3>
-            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-              {articulosFiltrados.map((art) => (
-                <label key={art.idArticulo} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={proveedorSeleccionado.articulos.includes(art.idArticulo)}
-                    onChange={() => toggleArticulo(art.idArticulo)}
-                  />
-                  <span>{art.nombreArticulo}</span>
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-end gap-4 mt-4">
-              <button
-                className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
-                onClick={() => {
-                  setModalAbierto(false);
-                  setProveedorSeleccionado(null);
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
-                onClick={async () => {
-                  if (!proveedorSeleccionado || proveedorSeleccionado.articulos.length === 0) {
-                    alert("Debe seleccionar al menos un artículo");
-                    return;
-                  }
+            <div className="text-white p-4">
+              <h2 className="text-xl font-bold mb-4">Agregar Proveedor</h2>
 
-                  const confirmar = confirm("¿Deseás guardar los cambios del proveedor?");
-                  if (!confirmar) return;
+              {/* Datos generales */}
+              <input
+                placeholder="Nombre del proveedor"
+                className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+                value={proveedorSeleccionado.nombreProveedor}
+                onChange={(e) =>
+                  setProveedorSeleccionado({
+                    ...proveedorSeleccionado,
+                    nombreProveedor: e.target.value,
+                  })
+                }
+              />
+              <input
+                placeholder="Dirección"
+                className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+                value={proveedorSeleccionado.direccion}
+                onChange={(e) =>
+                  setProveedorSeleccionado({
+                    ...proveedorSeleccionado,
+                    direccion: e.target.value,
+                  })
+                }
+              />
+              <input
+                placeholder="Email"
+                className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+                value={proveedorSeleccionado.mail}
+                onChange={(e) =>
+                  setProveedorSeleccionado({
+                    ...proveedorSeleccionado,
+                    mail: e.target.value,
+                  })
+                }
+              />
+              <input
+                placeholder="Teléfono"
+                className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
+                value={proveedorSeleccionado.telefono}
+                onChange={(e) =>
+                  setProveedorSeleccionado({
+                    ...proveedorSeleccionado,
+                    telefono: e.target.value,
+                  })
+                }
+              />
 
-                  const body = {
-                    proveedor: {
-                      nombreProveedor: proveedorSeleccionado.nombreProveedor,
-                      direccion: proveedorSeleccionado.direccion,
-                      mail: proveedorSeleccionado.mail,
-                      telefono: proveedorSeleccionado.telefono,
-                      masterArticulo: proveedorSeleccionado.masterArticulo,
-                    },
-                    articulos: proveedorSeleccionado.articulos.map((id) => ({
-                      idArticulo: id,
-                      precioUnitario: 100.0,
-                      tiempoEntregaDias: 30,
-                      fechaFinProveedorArticulo: null,
-                      costoPedido: 0,
-                    })),
-                  };
+              {/* Filtro y selección de artículos */}
+              <h3 className="font-semibold mt-2 mb-1">Filtrar artículos:</h3>
+              <input
+                placeholder="Buscar artículo"
+                className="w-full px-3 py-2 mb-2 rounded-md bg-zinc-800 border border-zinc-600"
+                value={filtroArticulo}
+                onChange={(e) => setFiltroArticulo(e.target.value)}
+              />
 
-                  try {
-                    const res = await fetch("http://localhost:5000/Proveedor/crea-prov-art", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(body),
-                    });
+              <h3 className="font-semibold mt-2">Seleccioná los artículos:</h3>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                {articulosFiltrados.map((art) => {
+                  const index = relacionesProveedor.findIndex(
+                    (r) => r.idArticulo === art.idArticulo
+                  );
+                  const rel = relacionesProveedor[index];
+                  const seleccionado = index !== -1;
 
-                    if (!res.ok) throw new Error("Error en la creación");
+                  return (
+                    <div key={art.idArticulo} className="border p-3 rounded bg-zinc-700">
+                      <label className="flex items-center gap-2 mb-2">
+                        <input
+                          type="checkbox"
+                          checked={seleccionado}
+                          onChange={() => {
+                            if (seleccionado) {
+                              setRelacionesProveedor(
+                                relacionesProveedor.filter(
+                                  (r) => r.idArticulo !== art.idArticulo
+                                )
+                              );
+                            } else {
+                              setRelacionesProveedor([
+                                ...relacionesProveedor,
+                                {
+                                  idArticulo: art.idArticulo,
+                                  nombreArticulo: art.nombreArticulo,
+                                  precioUnitario: 0,
+                                  tiempoEntregaDias: 0,
+                                  costoPedido: 0,
+                                },
+                              ]);
+                            }
+                          }}
+                        />
+                        <span className="font-semibold">{art.nombreArticulo}</span>
+                      </label>
 
-                    alert("Proveedor creado correctamente");
+                      {seleccionado && rel && (
+                        <>
+                          <p>Precio unitario</p>
+                          <input
+                            type="number"
+                            placeholder="Precio unitario"
+                            value={rel.precioUnitario}
+                            onChange={(e) => {
+                              const nuevas = [...relacionesProveedor];
+                              nuevas[index].precioUnitario = parseFloat(e.target.value);
+                              setRelacionesProveedor(nuevas);
+                            }}
+                            className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
+                          />
+                          <p>Tiempo entrega</p>
+                          <input
+                            type="number"
+                            placeholder="Tiempo entrega (días)"
+                            value={rel.tiempoEntregaDias}
+                            onChange={(e) => {
+                              const nuevas = [...relacionesProveedor];
+                              nuevas[index].tiempoEntregaDias = parseInt(e.target.value);
+                              setRelacionesProveedor(nuevas);
+                            }}
+                            className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
+                          />
+                          <p>Costo de Pedido</p>
+                          <input
+                            type="number"
+                            placeholder="Costo de pedido"
+                            value={rel.costoPedido}
+                            onChange={(e) => {
+                              const nuevas = [...relacionesProveedor];
+                              nuevas[index].costoPedido = parseFloat(e.target.value);
+                              setRelacionesProveedor(nuevas);
+                            }}
+                            className="w-full px-3 py-1 rounded bg-zinc-800"
+                          />
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Botones */}
+              <div className="flex justify-end gap-4 mt-4">
+                <button
+                  className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
+                  onClick={() => {
                     setModalAbierto(false);
                     setProveedorSeleccionado(null);
-                    // podés actualizar la lista si querés
-                  } catch (err) {
-                    console.error("Error al crear proveedor:", err);
-                    alert("Ocurrió un error al crear el proveedor");
-                  }
-                }}
-              >
-                Guardar
-              </button>
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
+                  onClick={async () => {
+                    if (relacionesProveedor.length === 0) {
+                      alert("Debe seleccionar al menos un artículo");
+                      return;
+                    }
+
+                    const confirmar = confirm(
+                      "¿Deseás guardar los cambios del proveedor?"
+                    );
+                    if (!confirmar) return;
+
+                    const body = {
+                      proveedor: {
+                        nombreProveedor: proveedorSeleccionado.nombreProveedor,
+                        direccion: proveedorSeleccionado.direccion,
+                        mail: proveedorSeleccionado.mail,
+                        telefono: proveedorSeleccionado.telefono,
+                        masterArticulo: proveedorSeleccionado.masterArticulo,
+                      },
+                      articulos: relacionesProveedor.map((r) => ({
+                        idArticulo: r.idArticulo,
+                        precioUnitario: r.precioUnitario,
+                        tiempoEntregaDias: r.tiempoEntregaDias,
+                        costoPedido: r.costoPedido,
+                      })),
+                    };
+
+                    try {
+                      const res = await fetch(
+                        "http://localhost:5000/Proveedor/crea-prov-art",
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(body),
+                        }
+                      );
+
+                      if (!res.ok) throw new Error("Error en la creación");
+
+                      alert("Proveedor creado correctamente");
+                      setModalAbierto(false);
+                      setProveedorSeleccionado(null);
+                    } catch (err) {
+                      console.error("Error al crear proveedor:", err);
+                      alert("Ocurrió un error al crear el proveedor");
+                    }
+                  }}
+                >
+                  Guardar
+                </button>
+              </div>
             </div>
-          </div>
           </div>
         </Modal>
       )}
+
       {/* Modal editar proveedor*/}
       {modalEditarAbierto && proveedorSeleccionado && (
         <Modal open={modalEditarAbierto} onClose={() => {
@@ -376,10 +525,10 @@ export default function Proveedores() {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                          nombreProveedor: proveedorSeleccionado.nombreProveedor,
-                          direccion: proveedorSeleccionado.direccion,
-                          mail: proveedorSeleccionado.mail,
-                          telefono: proveedorSeleccionado.telefono,
+                        nombreProveedor: proveedorSeleccionado.nombreProveedor,
+                        direccion: proveedorSeleccionado.direccion,
+                        mail: proveedorSeleccionado.mail,
+                        telefono: proveedorSeleccionado.telefono,
                       }),
                     });
 
@@ -402,99 +551,167 @@ export default function Proveedores() {
         </Modal>
       )}
 
-      {/* Modale relacion proveedor-articulo*/}
-      {modalRelacionAbierto && proveedorSeleccionado && (
+      {/* Modal editar relación proveedor-artículos */}
+     {modalRelacionAbierto && proveedorSeleccionado && (
   <Modal open={modalRelacionAbierto} onClose={() => {
     setModalRelacionAbierto(false);
     setProveedorSeleccionado(null);
+    setRelacionesProveedor([]);
+    setNuevasRelaciones([]);
   }}>
-    <div className="text-white p-4">
+    <div className="text-white p-4 max-h-[80vh] overflow-y-auto">
       <h2 className="text-xl font-bold mb-4">Editar relación proveedor-artículos</h2>
-      {relacionesProveedor.map((rel, i) => (
-              <div key={rel.idArticulo} className="mb-4">
-                <p className="font-bold mb-1">{rel.nombreArticulo}</p>
-                <input
-                  type="number"
-                  placeholder="Precio unitario"
-                  value={rel.precioUnitario}
-                  onChange={(e) => {
-                    const nuevos = [...relacionesProveedor];
-                    nuevos[i].precioUnitario = parseFloat(e.target.value);
-                    setRelacionesProveedor(nuevos);
-                  }}
-                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
-                />
-                <input
-                  type="number"
-                  placeholder="Tiempo de entrega (días)"
-                  value={rel.tiempoEntregaDias}
-                  onChange={(e) => {
-                    const nuevos = [...relacionesProveedor];
-                    nuevos[i].tiempoEntregaDias = parseInt(e.target.value);
-                    setRelacionesProveedor(nuevos);
-                  }}
-                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
-                />
-                <input
-                  type="number"
-                  placeholder="Costo de pedido"
-                  value={rel.costoPedido}
-                  onChange={(e) => {
-                    const nuevos = [...relacionesProveedor];
-                    nuevos[i].costoPedido = parseFloat(e.target.value);
-                    setRelacionesProveedor(nuevos);
-                  }}
-                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
-                />
+
+      {/* ARTÍCULOS YA RELACIONADOS */}
+      <h3 className="font-semibold mb-2">Artículos relacionados:</h3>
+      {relacionesProveedor.length === 0 && <p className="text-sm text-gray-400">No hay artículos relacionados.</p>}
+      {relacionesProveedor.map((rel) => (
+        <div key={rel.idArticulo} className="flex justify-between items-center mb-2 bg-zinc-800 p-2 rounded">
+          <span>{rel.nombreArticulo}</span>
+          <button
+            className="text-red-500 hover:text-red-300"
+            onClick={async () => {
+              try {
+                await fetch(`http://localhost:5000/Proveedor/articulo/baja-prov-art`, {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    idProveedor: proveedorSeleccionado.idProveedor,
+                    idArticulo: rel.idArticulo
+                  })
+                });
+                setRelacionesProveedor(relacionesProveedor.filter(r => r.idArticulo !== rel.idArticulo));
+              } catch (err) {
+                alert("Error al eliminar la relación");
+              }
+            }}
+          >
+            Eliminar
+          </button>
+        </div>
+      ))}
+
+      {/* NUEVAS RELACIONES */}
+      <h3 className="font-semibold mt-4 mb-2">Agregar nuevas relaciones:</h3>
+      <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+        {articulos
+          .filter(a => !relacionesProveedor.some(r => r.idArticulo === a.idArticulo))
+          .map((art) => {
+            const index = nuevasRelaciones.findIndex(r => r.idArticulo === art.idArticulo);
+            const rel = nuevasRelaciones[index];
+
+            return (
+              <div key={art.idArticulo} className="border p-3 rounded bg-zinc-700">
+                <label className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={!!rel}
+                    onChange={() => {
+                      const nuevas = [...nuevasRelaciones];
+                      if (rel) {
+                        setNuevasRelaciones(nuevas.filter(r => r.idArticulo !== art.idArticulo));
+                      } else {
+                        nuevas.push({
+                          idArticulo: art.idArticulo,
+                          nombreArticulo: art.nombreArticulo,
+                          precioUnitario: 0,
+                          tiempoEntregaDias: 0,
+                          costoPedido: 0,
+                        });
+                        setNuevasRelaciones(nuevas);
+                      }
+                    }}
+                  />
+                  <span>{art.nombreArticulo}</span>
+                </label>
+
+                {!!rel && (
+                  <>
+                    <input
+                      type="number"
+                      placeholder="Precio unitario"
+                      value={rel.precioUnitario ?? ""}
+                      onChange={(e) => {
+                        const nuevas = [...nuevasRelaciones];
+                        nuevas[index].precioUnitario = parseFloat(e.target.value);
+                        setNuevasRelaciones(nuevas);
+                      }}
+                      className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Tiempo entrega (días)"
+                      value={rel.tiempoEntregaDias ?? ""}
+                      onChange={(e) => {
+                        const nuevas = [...nuevasRelaciones];
+                        nuevas[index].tiempoEntregaDias = parseInt(e.target.value);
+                        setNuevasRelaciones(nuevas);
+                      }}
+                      className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Costo de pedido"
+                      value={rel.costoPedido ?? ""}
+                      onChange={(e) => {
+                        const nuevas = [...nuevasRelaciones];
+                        nuevas[index].costoPedido = parseFloat(e.target.value);
+                        setNuevasRelaciones(nuevas);
+                      }}
+                      className="w-full px-3 py-1 rounded bg-zinc-800"
+                    />
+                  </>
+                )}
               </div>
-            ))}
-            <div className="flex justify-end gap-4 mt-4">
-             <button
-                className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
-                onClick={() => {
-                  setModalRelacionAbierto(false);
-                  setProveedorSeleccionado(null);
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                className="px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-600"
-                onClick={async () => {
-                  try {
-                    const body = relacionesProveedor.map((rel) => ({
-                      idArticulo: rel.idArticulo,
-                      idProveedor: proveedorSeleccionado.idProveedor,
-                      precioUnitario: rel.precioUnitario,
-                      tiempoEntregaDias: rel.tiempoEntregaDias,
-                      costoPedido: rel.costoPedido,
-                    }));
+            );
+          })}
+      </div>
 
-                    const res = await fetch("http://localhost:5000/mod-prov-art", {
-                      method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(body),
-                    });
+      <div className="flex justify-end gap-4 mt-4">
+        <button
+          className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
+          onClick={() => {
+            setModalRelacionAbierto(false);
+            setProveedorSeleccionado(null);
+            setNuevasRelaciones([]);
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          className="px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-600"
+          onClick={async () => {
+            try {
+              for (const rel of nuevasRelaciones) {
+                await fetch("http://localhost:5000/Proveedor/crea-prov-art", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    idProveedor: proveedorSeleccionado.idProveedor,
+                    idArticulo: rel.idArticulo,
+                    precioUnitario: rel.precioUnitario,
+                    tiempoEntregaDias: rel.tiempoEntregaDias,
+                    costoPedido: rel.costoPedido,
+                  })
+                });
+              }
 
-                    if (!res.ok) throw new Error("Error al actualizar relación");
-
-                    alert("Relación actualizada correctamente");
-                    setModalRelacionAbierto(false);
-                    setProveedorSeleccionado(null);
-                  } catch (err) {
-                    console.error("Error al actualizar relación proveedor-artículo:", err);
-                    alert("Ocurrió un error");
-                  }
-                }}
-              >
-                Guardar cambios
-              </button>
-      
+              alert("Relaciones creadas correctamente");
+              setModalRelacionAbierto(false);
+              setProveedorSeleccionado(null);
+              setNuevasRelaciones([]);
+            } catch (err) {
+              console.error("Error al crear nuevas relaciones:", err);
+              alert("Error al crear nuevas relaciones");
+            }
+          }}
+        >
+          Guardar cambios
+        </button>
+      </div>
     </div>
-     </div>
   </Modal>
 )}
-
     </div >
   );
 }
