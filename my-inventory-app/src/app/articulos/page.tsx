@@ -6,13 +6,14 @@ import {
   FaEdit,
   FaTrash,
   FaCalculator,
+  FaUserTie,
 } from "react-icons/fa";
 import Modal from "@/app/components/Modal";
 
 interface Articulo {
-  idArticulo?: number; // puede que aún no exista en creación
+  idArticulo?: number;
   nombreArticulo: string;
-  descripcionArticulo: string;
+  descripcion: string;
   proveedor: string;
   modeloInv: number;
   categoriaArt: number;
@@ -22,7 +23,7 @@ interface Articulo {
   stockSeguridad: number;
   puntoPedido: string;
   cgi: string;
-  costoAlmacenaje: number;
+  costoAlmacen: number;
   costoPedido?: number;
   costoCompra?: number;
   stock?: {
@@ -38,7 +39,7 @@ interface Articulo {
   };
 }
 interface ModeloInventario {
-  idModeloInventario: number;
+  id: number;
   nombreModInv: string;
 }
 
@@ -57,6 +58,15 @@ interface ProveedorArticulo {
   costoPedido: number;
 }
 
+interface CalculoArticulo {
+  idArticulo: number;
+  nombreArticulo: string;
+  modeloInv: string;
+  stockSeguridad: number;
+  puntoPedido: number;
+  tiempoRevision: number;
+  cgi: number;
+}
 
 
 export default function Articulos() {
@@ -66,45 +76,32 @@ export default function Articulos() {
   const [modalEditar, setModalEditar] = useState<Articulo | null>(null);
   const [modalAgregar, setModalAgregar] = useState<boolean>(false);
   const [modelosInventario, setModelosInventario] = useState<ModeloInventario[]>([]);
-  const [proveedores] = useState<{ idProveedor: number, nombreProveedor: string }[]>([]);
-  const [modalStock, setModalStock] = useState<boolean>(false);
   const [modalCalculoGlobal, setModalCalculoGlobal] = useState(false);
-  const [calculosInventario, setCalculosInventario] = useState<
-    { idArticulo: number; nombreArticulo: string; loteFijo: number; intervaloFijo: number }[]
-  >([]);
+  const [calculosInventario, setCalculosInventario] = useState<CalculoArticulo[]>([]);
   const [busquedaCalculo, setBusquedaCalculo] = useState("");
-  const [busquedaStock, setBusquedaStock] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
+  const [modeloSeleccionado, setModeloSeleccionado] = useState('');
+  const [modalProveedor, setModalProveedor] = useState<Articulo | null>(null);
+  const [proveedoresArticulo, setProveedoresArticulo] = useState<ProveedorArticulo[]>([]);
+
 
 
   useEffect(() => {
-    fetch("http://localhost:5000/MaestroArticulos/articulos/list-art-datos")
-      .then((res) => res.json())
-      .then((data) => {
-        const articulosTransformados: Articulo[] = data.map((item: Articulo) => ({
-          idArticulo: item.idArticulo,
-          nombreArticulo: item.nombreArticulo,
-          descripcionArticulo: item.descripcionArticulo || item.descripcionArticulo || "",
-          categoriaArticulo: item.categoriaArt,
-          proveedor: item.proveedor || "Predeterminado",
-          modeloInventario: item.modeloInv,
-          demandaDiaria: item.demandaDiaria,
-          tiempoRevision: item.tiempoRevision || "",
-          stockActual: Number(item.stockActual) || 0,
-          stockSeguridad: Number(item.stockSeguridad) || 0,
-          puntoPedido: item.puntoPedido || "",
-          cgi: item.cgi || "",
-          costoAlmacenaje: Number(item.costoAlmacenaje) || 0,
-        }));
-        setArticulos(articulosTransformados);
-      })
-      .catch((error) => console.error("Error al cargar artículos:", error));
+    obtenerArticulos();
   }, []);
+
+  useEffect(() => {
+    if (modalEditar) {
+      setCategoriaSeleccionada(modalEditar.categoriaArt?.toString() || '');
+      setModeloSeleccionado(modalEditar.modeloInv?.toString() || '');
+    }
+  }, [modalEditar]);
 
 
   const filtrados = articulos.filter((art) =>
     art.nombreArticulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-    art.descripcionArticulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+    art.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
     String(art.idArticulo).includes(busqueda)
   );
 
@@ -159,7 +156,6 @@ export default function Articulos() {
         },
         body: JSON.stringify(articulo),
       });
-
       if (!response.ok) {
         throw new Error("No se pudo actualizar el artículo.");
       }
@@ -181,17 +177,17 @@ export default function Articulos() {
       const articulosTransformados: Articulo[] = data.map((item: Articulo) => ({
         idArticulo: item.idArticulo,
         nombreArticulo: item.nombreArticulo,
-        descripcionArticulo: item.descripcionArticulo || "",
+        descripcion: item.descripcion,
         categoriaArt: item.categoriaArt,
-        proveedor: item.proveedor || "Predeterminado",
+        proveedor: item.proveedor || "sin asignar",
         modeloInv: item.modeloInv,
         demandaDiaria: item.demandaDiaria,
-        tiempoRevision: item.tiempoRevision || "",
-        stockActual: Number(item.stockActual) || 0,
-        stockSeguridad: Number(item.stockSeguridad) || 0,
-        puntoPedido: item.puntoPedido || "",
-        cgi: item.cgi || "",
-        costoAlmacenaje: Number(item.costoAlmacenaje) || 0,
+        tiempoRevision: item.tiempoRevision,
+        stockActual: Number(item.stockActual),
+        stockSeguridad: Number(item.stockSeguridad),
+        puntoPedido: item.puntoPedido,
+        cgi: item.cgi,
+        costoAlmacen: Number(item.costoAlmacen),
       }));
       setArticulos(articulosTransformados);
     } catch (error) {
@@ -218,25 +214,52 @@ export default function Articulos() {
     }
   };
 
+  const abrirModalProveedor = async (articulo: Articulo) => {
+    try {
+      const res = await fetch(`http://localhost:5000/MaestroArticulos/articulosLista/proveedores/${articulo.idArticulo}`);
+      const data = await res.json();
+      setProveedoresArticulo(data); // suponiendo que es un array de ProveedorArticulo
+      setModalProveedor(articulo);
+    } catch (err) {
+      console.error("Error al obtener proveedores:", err);
+      alert("No se pudieron cargar los proveedores.");
+    }
+  };
+  const establecerProveedorPredeterminado = async (idArticulo: number, idProveedor: number) => {
+    try {
+      const res = await fetch(`http://localhost:5000/MaestroArticulos/proveedor/predeterminado?idArticulo=${idArticulo}&idProveedor=${idProveedor}`, {
+        method: "POST"
+      });
+
+      if (!res.ok) throw new Error("No se pudo establecer el proveedor predeterminado");
+
+      alert("Proveedor predeterminado actualizado correctamente.");
+      await obtenerArticulos();
+      setModalProveedor(null);
+    } catch (err) {
+      console.error("Error al establecer proveedor predeterminado:", err);
+      alert("Error al establecer proveedor predeterminado.");
+    }
+  };
+
+
   const cargarCalculos = async () => {
     try {
-      const res = await fetch("/mock-data/calculos_inventarios.json"); // <-- ajustá a tu endpoint real
+      const res = await fetch("http://localhost:5000/MaestroArticulos/modeloInventario/calc-mod-inv");
+      if (!res.ok) throw new Error("Error al obtener cálculos");
       const data = await res.json();
-      setCalculosInventario(data.calculos); // estructura esperada: [{ idArticulo, nombreArticulo, loteFijo, intervaloFijo }]
+      setCalculosInventario(data); // suponiendo que devuelve array directo
       setModalCalculoGlobal(true);
     } catch (error) {
       console.error("Error al cargar cálculos:", error);
+      alert("No se pudieron cargar los cálculos de inventario.");
     }
   };
-  const calculosFiltrados = calculosInventario.filter((item) =>
-    item.nombreArticulo.toLowerCase().includes(busquedaCalculo.toLowerCase()) ||
-    String(item.idArticulo).includes(busquedaCalculo)
-  );
 
-  const articulosFiltradosStock = articulos.filter((art) =>
-    art.nombreArticulo.toLowerCase().includes(busquedaStock.toLowerCase()) ||
-    String(art.idArticulo).includes(busquedaStock)
-  );
+  const calculosFiltrados = calculosInventario.filter((item) =>
+  item.nombreArticulo?.toLowerCase().includes(busquedaCalculo.toLowerCase()) ||
+  String(item.idArticulo).includes(busquedaCalculo)
+);
 
   return (
     <div className="text-white px-6 py-10">
@@ -262,15 +285,7 @@ export default function Articulos() {
         >
           <FaCalculator />
         </button>
-        <button
-          onClick={() => setModalStock(true)}
-          className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90"
-        >
-          MANEJO DE STOCK
-        </button>
-
       </div>
-
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse text-sm">
           <thead className="bg-zinc-900 text-zinc-300">
@@ -279,7 +294,7 @@ export default function Articulos() {
               <th className="px-2 py-1 border">Nombre</th>
               <th className="px-2 py-1 border">Descripción</th>
               <th className="px-2 py-1 border">Categoría</th>
-              <th className="px-2 py-1 border">Proveedor</th>
+              <th className="px-2 py-1 border">Proveedor predeterminado</th>
               <th className="px-2 py-1 border">Modelo Inventario</th>
               <th className="px-2 py-1 border">Stock Actual</th>
               <th className="px-2 py-1 border">Stock Seguridad</th>
@@ -295,27 +310,29 @@ export default function Articulos() {
               <tr key={art.idArticulo} className="hover:bg-zinc-800">
                 <td className="px-2 py-1 border">{art.idArticulo}</td>
                 <td className="px-2 py-1 border">{art.nombreArticulo}</td>
-                <td className="px-2 py-1 border">{art.descripcionArticulo}</td>
+                <td className="px-2 py-1 border">{art.descripcion}</td>
                 <td className="px-2 py-1 border">{art.categoriaArt}</td>
-                <td className="px-2 py-1 border">{art.proveedor}</td>
-                <td className="px-2 py-1 border">
-                  {typeof art.modeloInv === "object" && art.modeloInv !== null
-                    ? art.modeloInv
-                    : "Sin modelo"}
-                </td>
+                <td className="px-2 py-1 border">{art.proveedor?.trim() ? art.proveedor : "sin asignar"}</td>
+                <td className="px-2 py-1 border">{art.modeloInv}</td>
                 <td className="px-2 py-1 border">{art.stockActual}</td>
                 <td className="px-2 py-1 border">{art.stockSeguridad}</td>
                 <td className="px-2 py-1 border">{art.puntoPedido}</td>
                 <td className="px-2 py-1 border">{art.cgi}</td>
                 <td className="px-2 py-1 border">{art.demandaDiaria}</td>
                 <td className="px-2 py-1 border">{art.tiempoRevision}</td>
-                <td className="px-2 py-1 border">${art.costoAlmacenaje}</td>
+                <td className="px-2 py-1 border">${art.costoAlmacen}</td>
                 <td className="px-3 py-2 border border-gray-700 text-center">
                   <button onClick={() => setModalEditar(art)} className="mr-2 hover:text-yellow-300">
                     <FaEdit />
                   </button>
                   <button onClick={() => handleEliminar(art.idArticulo!)} className="hover:text-red-500">
                     <FaTrash />
+                  </button>
+                  <button
+                    onClick={() => abrirModalProveedor(art)}
+                    className="ml-2 text-yellow-300 hover:text-yellow-400"
+                  >
+                    <FaUserTie />
                   </button>
                 </td>
               </tr>
@@ -327,106 +344,92 @@ export default function Articulos() {
       {/* Modal Agregar */}
       {modalAgregar && (
         <Modal title="Agregar Artículo" onClose={() => setModalAgregar(false)}>
-          <form onSubmit={(e: React.FormEvent) => {
-            e.preventDefault();
-            const form = e.currentTarget as any;
+          <div className="max-h-[80vh] overflow-y-auto p-4">
+            <form onSubmit={(e: React.FormEvent) => {
+              e.preventDefault();
+              const form = e.currentTarget as HTMLFormElement;
 
-            const idModeloInventario = Number(form.idModeloInventario.value);
-            const idCategoria = Number(form.categoriaArticulo.value);
+              const nombreArticulo = form.nombreArticulo.value;
+              const descripcion = form.descripcion.value;
+              const modeloInv = parseInt(form.modeloInv.value, 10);
+              const categoriaArt = parseInt(form.categoriaArticulo.value, 10);
+              const demandaDiaria = parseFloat(form.demandaDiaria.value);
+              const tiempoRevision = parseFloat(form.tiempoRevision.value);
+              const costoAlmacen = parseFloat(form.costoAlmacen.value);
 
-            if (!idModeloInventario || !idCategoria) {
-  alert("Seleccioná modelo de inventario y categoría.");
-  return;
-}
+              const nuevo = {
+                nombreArticulo,
+                descripcion,
+                modeloInv,
+                categoriaArt,
+                demandaDiaria,
+                tiempoRevision,
+                costoAlmacen,
+              };
 
-            const modeloSeleccionado = modelosInventario.find((m) => m.idModeloInventario === idModeloInventario);
-            const categoriaSeleccionada = categorias.find((c) => c.id === idCategoria);
+              if (
+                !nuevo.nombreArticulo ||
+                !nuevo.descripcion ||
+                !nuevo.modeloInv ||
+                !nuevo.categoriaArt ||
+                isNaN(nuevo.demandaDiaria) ||
+                isNaN(nuevo.tiempoRevision) ||
+                isNaN(nuevo.costoAlmacen)
+              ) {
+                alert("Todos los campos son obligatorios y deben ser válidos");
+                return;
+              }
 
-            console.log("Modelo ID:", form.idModeloInventario?.value);
-            console.log("Categoría ID:", form.categoriaArticulo?.value);
-            console.log("Nombre:", form.nombreArticulo?.value);
-            console.log("Descripción:", form.descripcionArticulo?.value);
-            console.log("Demanda:", form.demandaDiaria?.value);
-            console.log("Revisión:", form.tiempoRevision?.value);
-            console.log("Almacenaje:", form.costoAlmacenaje?.value);
+              if (window.confirm("¿Confirmás que querés agregar este artículo?")) {
+                handleAgregar(nuevo);
+              }
+            }}
+              className="space-y-2"
+            >
 
-            if (
-              !modeloSeleccionado ||
-              !categoriaSeleccionada ||
-              !form.nombreArticulo.value ||
-              !form.descripcionArticulo.value ||
-              !form.demandaDiaria.value ||
-              !form.tiempoRevision.value ||
-              !form.costoAlmacenaje.value
-            ) {
-              alert("Todos los campos son obligatorios");
-              return;
-            }
-
-            const nuevo: Articulo = {
-              nombreArticulo: form.nombreArticulo.value,
-              descripcionArticulo: form.descripcionArticulo.value,
-              modeloInv: Number(idModeloInventario),
-              categoriaArt: Number(idCategoria),
-              demandaDiaria: Number(form.demandaDiaria.value),
-              tiempoRevision: Number(form.tiempoRevision.value),
-              costoAlmacenaje: Number(form.costoAlmacenaje.value),
-              stockActual: 0,
-              stockSeguridad: 0,
-              puntoPedido: "",
-              cgi: "",
-              proveedor: "Predeterminado",
-            };
-
-            if (window.confirm("¿Confirmás que querés agregar este artículo?")) {
-              handleAgregar(nuevo);
-            }
-          }}
-            className="space-y-2"
-          >
-
-            <input name="nombreArticulo" placeholder="Nombre" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="descripcionArticulo" placeholder="Descripción" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="demandaDiaria" type="number" placeholder="Demanda Diaria" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="tiempoRevision" type="number" placeholder="Tiempo Revision" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <input name="costoAlmacenaje" type="number" placeholder="Costo Almacenaje" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-white block mb-1">Seleccionar modelo de Inventario</label>
-                <select
-                  name="idModeloInventario"
-                  className="w-full px-2 py-1 rounded bg-gray-700 text-white">
-                  <option value="">Seleccionar modelo</option>
-                  {modelosInventario.map((modelo: ModeloInventario) => (
-                    <option key={modelo.idModeloInventario} value={modelo.idModeloInventario}>
-                      {modelo.nombreModInv}
-                    </option>
-                  ))}
-                </select>
+              <input name="nombreArticulo" placeholder="Nombre" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <input name="descripcion" placeholder="Descripción" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <input name="demandaDiaria" type="number" placeholder="Demanda Diaria" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <input name="tiempoRevision" type="number" placeholder="Tiempo Revision" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <input name="costoAlmacen" type="number" placeholder="Costo Almacenaje" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-white block mb-1">Seleccionar modelo de Inventario</label>
+                  <select
+                    name="modeloInv"
+                    className="w-full px-2 py-1 rounded bg-gray-700 text-white">
+                    <option value="">Seleccionar modelo</option>
+                    {modelosInventario.map((modelo: ModeloInventario) => (
+                      <option key={modelo.id} value={modelo.id}>
+                        {modelo.nombreModInv}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-white block mb-1">Seleccionar categoría</label>
+                  <select
+                    name="categoriaArticulo"
+                    className="w-full px-2 py-1 rounded bg-gray-700 text-white">
+                    <option value="">Seleccionar categoría</option>
+                    {categorias.map((categoria: Categoria) => (
+                      <option key={categoria.id} value={categoria.id}>
+                        {categoria.nombreCatArt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="text-white block mb-1">Seleccionar categoría</label>
-                <select
-                  name="categoriaArticulo"
-                  className="w-full px-2 py-1 rounded bg-gray-700 text-white">
-                  <option value="">Seleccionar categoría</option>
-                  {categorias.map((categoria: Categoria) => (
-                    <option key={categoria.id} value={categoria.id}>
-                      {categoria.nombreCatArt}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setModalAgregar(false)} className="bg-zinc-600 px-4 py-2 rounded">
+                  Cancelar
+                </button>
+                <button type="submit" className="bg-white text-black px-4 py-2 rounded">
+                  Confirmar
+                </button>
               </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setModalAgregar(false)} className="bg-zinc-600 px-4 py-2 rounded">
-                Cancelar
-              </button>
-              <button type="submit" className="bg-white text-black px-4 py-2 rounded">
-                Confirmar
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </Modal>
       )
       }
@@ -435,130 +438,118 @@ export default function Articulos() {
       {
         modalEditar && (
           <Modal title="Editar Artículo" onClose={() => setModalEditar(null)}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
+            <div className="max-h-[80vh] overflow-y-auto p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
 
-                // Obtener proveedor
-                const idProveedor = Number(form.idProveedor.value);
-                const proveedorSeleccionado = proveedores.find((p) => p.idProveedor === idProveedor);
+                  const modeloInvParsed = Number(modeloSeleccionado);
+                  const categoriaArtParsed = Number(categoriaSeleccionada);
 
-                // Obtener modelo de inventario
-                const idModeloInventario = Number(form.idModeloInventario.value);
-                const modeloSeleccionado = modelosInventario.find((m) => m.idModeloInventario === idModeloInventario);
+                  const articuloEditado = {
+                    idArticulo: modalEditar.idArticulo,
+                    nombreArticulo: form.nombreArticulo.value,
+                    descripcion: form.descripcion.value,
+                    modeloInv: modeloInvParsed,
+                    categoriaArt: categoriaArtParsed,
+                    demandaDiaria: Number(form.demandaDiaria.value),
+                    tiempoRevision: Number(form.tiempoRevision.value),
+                    costoAlmacen: Number(form.costoAlmacen.value),
+                  };
+                  console.log("Artículo que se está enviando al backend:", articuloEditado);
 
-                // Obtener categoría
-                const idCategoriaArticulo = Number(form.idCategoriaArticulo.value);
-                const categoriaSeleccionada = categorias.find((c) => c.id === idCategoriaArticulo);
-
-
-                const articuloEditado: Articulo = {
-                  nombreArticulo: form.nombreArticulo.value,
-                  descripcionArticulo: form.descripcionArticulo.value,
-                  demandaDiaria: Number(form.demandaDiaria.value),
-                  tiempoRevision: Number(form.tiempoRevision.value),
-                  costoAlmacenaje: Number(form.costoAlmacenaje.value),
-                  puntoPedido: form.puntoPedido.value,
-                  modeloInventario: modeloSeleccionado
-                    ? {
-                      idModeloInventario: modeloSeleccionado.idModeloInventario,
-                      nombreModInv: modeloSeleccionado.nombreModInv,
-                    }
-                    : null,
-                  categoriaArticulo: categoriaSeleccionada
-                    ? {
-                      id: categoriaSeleccionada.id,
-                      nombreCatArt: categoriaSeleccionada.nombreCatArt,
-                    }
-                    : "", // vacío si no hay selección
-                  proveedorPredeterminado: proveedorSeleccionado
-                    ? {
-                      idProveedor: proveedorSeleccionado.idProveedor,
-                      nombreProveedor: proveedorSeleccionado.nombreProveedor,
-                      tipoProveedor: proveedorSeleccionado.tipoProveedor ?? "General",
-                    }
-                    : undefined,
-                  estado: modalEditar.estado,
-                  fechaBaja: modalEditar.fechaBaja,
-                };
-
-                if (window.confirm("¿Guardar los cambios de este artículo?")) {
-                  handleEditar(articuloEditado);
-                }
-              }}
-              className="space-y-2"
-            >
-              <input name="nombreArticulo" placeholder="Nombre" required defaultValue={modalEditar.nombreArticulo} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <input name="descripcionArticulo" placeholder="Descripción" required defaultValue={modalEditar.descripcionArticulo} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <select
-                name="idCategoriaArticulo"
-                className="w-full px-2 py-1 rounded bg-gray-700 text-white"
-                required
-                defaultValue={
-                  typeof modalEditar.categoriaArticulo === "object"
-                    ? modalEditar.categoriaArticulo.id
-                    : ""
-                }
+                  if (window.confirm("¿Guardar los cambios de este artículo?")) {
+                    handleEditar(articuloEditado);
+                  }
+                }}
+                className="space-y-2"
               >
-                <option value="">Seleccionar Categoría</option>
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.nombreCatArt}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="idModeloInventario"
-                required
-                defaultValue={
-                  typeof modalEditar.modeloInventario === "object"
-                    ? modalEditar.modeloInventario.idModeloInventario
-                    : ""
-                }
-                className="w-full px-2 py-1 rounded bg-gray-700 text-white"
-              >
-                <option value="">Seleccionar Modelo de Inventario</option>
-                {modelosInventario.map((m) => (
-                  <option key={m.idModeloInventario} value={m.idModeloInventario}>
-                    {m.nombreModInv}
-                  </option>
-                ))}
-              </select>
-              <select
-                name="idProveedor"
-                required
-                defaultValue={modalEditar.proveedorPredeterminado?.idProveedor ?? ""}
-                className="w-full px-2 py-1 rounded bg-gray-700 text-white"
-              >
-                <option value="">Seleccionar Proveedor</option>
-                {proveedores.map((p) => (
-                  <option key={p.idProveedor} value={p.idProveedor}>
-                    {p.nombreProveedor}
-                  </option>
-                ))}
-              </select>
-              <input name="demandaDiaria" type="number" placeholder="Demanda Diaria" required defaultValue={modalEditar.demandaDiaria} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <input name="tiempoRevision" placeholder="Tiempo de Revisión" required defaultValue={modalEditar.tiempoRevision} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <input name="costoAlmacenaje" type="number" placeholder="Costo de Almacenamiento" required defaultValue={modalEditar.costoAlmacenaje} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <input name="puntoPedido" type="number" placeholder="Pundo de Pedido" required defaultValue={modalEditar.puntoPedido} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setModalEditar(null)} className="bg-zinc-600 px-4 py-2 rounded">
-                  Cancelar
-                </button>
-                <button type="submit" className="bg-white text-black px-4 py-2 rounded">
-                  Guardar cambios
-                </button>
-              </div>
-            </form>
+                <label className="text-white block mb-1">Nombre articulo</label>
+                <input name="nombreArticulo" placeholder="Nombre" required defaultValue={modalEditar.nombreArticulo} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
+                <label className="text-white block mb-1">Descripción</label>
+                <input name="descripcion" placeholder="Descripción" required defaultValue={modalEditar.descripcion} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
+                <label className="text-white block mb-1">Categoria articulo</label>
+                <select
+                  name="idCategoriaArticulo"
+                  className="w-full px-2 py-1 rounded bg-gray-700 text-white"
+                  required
+                  value={categoriaSeleccionada}
+                  onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                >
+                  <option value="">Seleccionar categoria</option>
+                  {categorias.map((cat) => (
+                    <option key={cat.id} value={cat.id.toString()}>
+                      {cat.nombreCatArt}
+                    </option>
+                  ))}
+                </select>
+                <label className="text-white block mb-1">Modelo inventario</label>
+                <select
+                  name="modeloInv"
+                  required
+                  value={modeloSeleccionado}
+                  onChange={(e) => setModeloSeleccionado(e.target.value)}
+                  className="w-full px-2 py-1 rounded bg-gray-700 text-white"
+                >
+                  <option value="">Seleccionar modelo</option>
+                  {modelosInventario.map((m) => (
+                    <option key={m.id} value={m.id.toString()}>
+                      {m.nombreModInv}
+                    </option>
+                  ))}
+                </select>
+                <label className="text-white block mb-1">Demanda diaria</label>
+                <input name="demandaDiaria" type="number" placeholder="Demanda Diaria" required defaultValue={modalEditar.demandaDiaria} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
+                <label className="text-white block mb-1">Tiempo de revision</label>
+                <input name="tiempoRevision" placeholder="Tiempo de Revisión" required defaultValue={modalEditar.tiempoRevision} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
+                <label className="text-white block mb-1">Costo almacenamiento</label>
+                <input name="costoAlmacen" type="number" placeholder="Costo de Almacenamiento" required defaultValue={modalEditar.costoAlmacen} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" />
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={() => setModalEditar(null)} className="bg-zinc-600 px-4 py-2 rounded">
+                    Cancelar
+                  </button>
+                  <button type="submit" className="bg-white text-black px-4 py-2 rounded">
+                    Guardar cambios
+                  </button>
+                </div>
+              </form>
+            </div>
           </Modal>
         )
       }
+      {/* Modal Proveedor */}
+      {modalProveedor && (
+        <Modal title={`Seleccionar proveedor para "${modalProveedor.nombreArticulo}"`} onClose={() => setModalProveedor(null)}>
+          <div className="max-h-[80vh] overflow-y-auto p-4">
+            <div className="p-4 text-sm text-white">
+              {proveedoresArticulo.length === 0 && <p>No hay proveedores asociados.</p>}
+              {proveedoresArticulo.map((prov) => (
+                <div key={prov.idProveedor} className="flex justify-between items-center border-b border-zinc-600 py-2">
+                  <div>
+                    <p><strong>ID:</strong> {prov.idProveedor}</p>
+                    <p><strong>Precio:</strong> ${prov.precioUnitario}</p>
+                    <p><strong>Tiempo entrega:</strong> {prov.tiempoEntregaDias} días</p>
+                    <p><strong>Actual:</strong> {prov.predeterminado ? "✅ Sí" : "No"}</p>
+                  </div>
+                  <button className="bg-blue-600 px-2 py-1 rounded mt-2"
+                    onClick={() => establecerProveedorPredeterminado(modalProveedor.idArticulo, prov.idProveedor)}
+                  >
+                    Establecer predeterminado
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      )}
+
 
       {/* Modal Cálculo */}
       {
         modalCalculoGlobal && (
           <Modal title="Cálculo de Modelos de Inventario" onClose={() => setModalCalculoGlobal(false)}>
+            <div className="max-h-[80vh] overflow-y-auto p-4">
             <div className="text-sm text-white space-y-4 max-h-[70vh] overflow-y-auto">
               <input
                 type="text"
@@ -570,83 +561,28 @@ export default function Articulos() {
               {calculosFiltrados.map((item) => (
                 <div key={item.idArticulo} className="border-b border-zinc-600 pb-2">
                   <h3 className="font-bold text-yellow-300 mb-1">{item.nombreArticulo}</h3>
-                  <p>Lote Fijo (EOQ): <strong>{item.loteFijo}</strong> unidades</p>
-                  <p>Intervalo Fijo: <strong>{item.intervaloFijo}</strong> días</p>
+                  <p>Modelo de Inventario: <strong>{item.modeloInv}</strong></p>
+                  <p>Stock de Seguridad: <strong>{item.stockSeguridad}</strong></p>
+
+                  {item.modeloInv === "LoteFijo_Q" && (
+                    <>
+                      <p>Punto de Pedido: <strong>{item.puntoPedido}</strong></p>
+                      <p>Tiempo de Revisión: <em>(no aplica)</em></p>
+                    </>
+                  )}
+
+                  {item.modeloInv === "PeriodoFijo_P" && (
+                    <>
+                      <p>Tiempo de Revisión: <strong>{item.tiempoRevision}</strong> días</p>
+                      <p>Punto de Pedido: <em>(no aplica)</em></p>
+                    </>
+                  )}
+
+                  <p>CGI (Costo Global de Inventario): <strong>${item.cgi}</strong></p>
                 </div>
               ))}
-              {calculosFiltrados.length === 0 && (
-                <p className="text-gray-400">No se encontraron cálculos.</p>
-              )}
             </div>
-          </Modal>
-        )
-      }
-
-      {/* Modal Stock */}
-      {
-        modalStock && (
-          <Modal title="Manejo de Stock" onClose={() => setModalStock(false)}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
-                const nuevos = [...articulos];
-
-                nuevos.forEach((art, index) => {
-                  const stockActual = Number(form[`stockActual_${index}`].value);
-                  const stockSeguridad = Number(form[`stockSeguridad_${index}`].value);
-                  if (!isNaN(stockActual)) art.stock.stockActual = stockActual;
-                  if (!isNaN(stockSeguridad)) art.stock.stockSeguridad = stockSeguridad;
-                });
-
-                if (window.confirm("¿Confirmás los cambios en el stock?")) {
-                  setArticulos(nuevos);
-                  setModalStock(false);
-                }
-
-              }}
-              className="space-y-4"
-            >
-              <input
-                type="text"
-                placeholder="Buscar artículo por ID o nombre"
-                value={busquedaStock}
-                onChange={(e) => setBusquedaStock(e.target.value)}
-                className="w-full p-2 mb-4 bg-zinc-800 border border-zinc-600 rounded text-white"
-              />
-              {articulosFiltradosStock.map((art, index) => (
-                <div key={art.idArticulo} className="border-b border-zinc-600 pb-2">
-                  <h4 className="font-semibold text-white">{art.nombreArticulo}</h4>
-                  <div className="flex gap-2">
-                    <input
-                      name={`stockActual_${index}`}
-                      type="number"
-                      min={0}
-                      defaultValue={art.stock?.stockActual || 0}
-                      placeholder="Stock actual"
-                      className="w-1/2 p-2 bg-zinc-800 border border-zinc-600 rounded"
-                    />
-                    <input
-                      name={`stockSeguridad_${index}`}
-                      type="number"
-                      min={0}
-                      defaultValue={art.stock?.stockSeguridad || 0}
-                      placeholder="Stock seguridad"
-                      className="w-1/2 p-2 bg-zinc-800 border border-zinc-600 rounded"
-                    />
-                  </div>
-                </div>
-              ))}
-
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setModalStock(false)} className="bg-zinc-600 px-4 py-2 rounded">
-                  Cancelar
-                </button>
-                <button type="submit" className="bg-white text-black px-4 py-2 rounded">
-                  Guardar cambios
-                </button>
-              </div>
-            </form>
+            </div>
           </Modal>
         )
       }

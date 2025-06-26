@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaUserTie, FaTrashAlt, FaEdit } from "react-icons/fa";
+import { FaUserTie, FaTrashAlt, FaEdit,FaCogs } from "react-icons/fa";
 import Modal from "@/app/components/Modal";
 
 interface Proveedor {
@@ -20,6 +20,14 @@ interface Articulo {
   nombreArticulo: string;
 }
 
+interface RelacionArticulo {
+  idArticulo: number;
+  nombreArticulo: string;
+  precioUnitario: number;
+  tiempoEntregaDias: number;
+  costoPedido: number;
+}
+
 export default function Proveedores() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [articulos, setArticulos] = useState<Articulo[]>([]);
@@ -28,6 +36,9 @@ export default function Proveedores() {
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [modalRelacionAbierto, setModalRelacionAbierto] = useState(false);
+  const [relacionesProveedor, setRelacionesProveedor] = useState<RelacionArticulo[]>([]);
+
 
 
   useEffect(() => {
@@ -72,15 +83,15 @@ export default function Proveedores() {
   );
 
   const toggleArticulo = (idArticulo: number) => {
-  if (!proveedorSeleccionado) return;
+    if (!proveedorSeleccionado) return;
 
-  const yaSeleccionado = proveedorSeleccionado.articulos.includes(idArticulo);
-  const nuevosArticulos = yaSeleccionado
-    ? proveedorSeleccionado.articulos.filter((id) => id !== idArticulo)
-    : [...proveedorSeleccionado.articulos, idArticulo];
+    const yaSeleccionado = proveedorSeleccionado.articulos.includes(idArticulo);
+    const nuevosArticulos = yaSeleccionado
+      ? proveedorSeleccionado.articulos.filter((id) => id !== idArticulo)
+      : [...proveedorSeleccionado.articulos, idArticulo];
 
-  setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevosArticulos });
-};
+    setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevosArticulos });
+  };
 
   return (
     <div className="text-white mt-12 mx-6">
@@ -147,6 +158,28 @@ export default function Proveedores() {
                 >
                   <FaTrashAlt />
                 </button>
+                <button
+                  onClick={() => {
+                    setProveedorSeleccionado({ ...prov, articulos: prov.articulos || [] });
+                    setRelacionesProveedor(
+                      articulos
+                      .filter((a) => prov.articulos.includes(a.idArticulo))
+                      .map((a) => ({
+                        idArticulo: a.idArticulo,
+                        nombreArticulo: a.nombreArticulo,
+                        precioUnitario: 0,
+                        tiempoEntregaDias: 0,
+                        costoPedido: 0,
+                      }))
+                    );
+                    setModalRelacionAbierto(true);
+                  }}
+                  className="text-yellow-400 hover:text-yellow-300"
+                  title="Editar relación proveedor-artículos"
+                >
+                  <FaCogs />
+                </button>
+
               </div>
             </div>
             <p className="text-zinc-400 text-sm mt-1">ID: {prov.idProveedor}</p>
@@ -162,6 +195,7 @@ export default function Proveedores() {
           setModalAbierto(false);
           setProveedorSeleccionado(null);
         }}>
+          <div className="max-h-[80vh] overflow-y-auto p-4">
           <div className="text-white p-4">
             <h2 className="text-xl font-bold mb-4">Agregar Proveedor</h2>
             <input
@@ -277,9 +311,10 @@ export default function Proveedores() {
               </button>
             </div>
           </div>
+          </div>
         </Modal>
       )}
-
+      {/* Modal editar proveedor*/}
       {modalEditarAbierto && proveedorSeleccionado && (
         <Modal open={modalEditarAbierto} onClose={() => {
           setModalEditarAbierto(false);
@@ -320,7 +355,6 @@ export default function Proveedores() {
                 setProveedorSeleccionado({ ...proveedorSeleccionado, telefono: e.target.value })
               }
             />
-
             <div className="flex justify-end gap-4 mt-4">
               <button
                 className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
@@ -342,10 +376,10 @@ export default function Proveedores() {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                        nombreProveedor: proveedorSeleccionado.nombreProveedor,
-                        direccion: proveedorSeleccionado.direccion,
-                        mail: proveedorSeleccionado.mail,
-                        telefono: proveedorSeleccionado.telefono,
+                          nombreProveedor: proveedorSeleccionado.nombreProveedor,
+                          direccion: proveedorSeleccionado.direccion,
+                          mail: proveedorSeleccionado.mail,
+                          telefono: proveedorSeleccionado.telefono,
                       }),
                     });
 
@@ -368,6 +402,99 @@ export default function Proveedores() {
         </Modal>
       )}
 
+      {/* Modale relacion proveedor-articulo*/}
+      {modalRelacionAbierto && proveedorSeleccionado && (
+  <Modal open={modalRelacionAbierto} onClose={() => {
+    setModalRelacionAbierto(false);
+    setProveedorSeleccionado(null);
+  }}>
+    <div className="text-white p-4">
+      <h2 className="text-xl font-bold mb-4">Editar relación proveedor-artículos</h2>
+      {relacionesProveedor.map((rel, i) => (
+              <div key={rel.idArticulo} className="mb-4">
+                <p className="font-bold mb-1">{rel.nombreArticulo}</p>
+                <input
+                  type="number"
+                  placeholder="Precio unitario"
+                  value={rel.precioUnitario}
+                  onChange={(e) => {
+                    const nuevos = [...relacionesProveedor];
+                    nuevos[i].precioUnitario = parseFloat(e.target.value);
+                    setRelacionesProveedor(nuevos);
+                  }}
+                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
+                />
+                <input
+                  type="number"
+                  placeholder="Tiempo de entrega (días)"
+                  value={rel.tiempoEntregaDias}
+                  onChange={(e) => {
+                    const nuevos = [...relacionesProveedor];
+                    nuevos[i].tiempoEntregaDias = parseInt(e.target.value);
+                    setRelacionesProveedor(nuevos);
+                  }}
+                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
+                />
+                <input
+                  type="number"
+                  placeholder="Costo de pedido"
+                  value={rel.costoPedido}
+                  onChange={(e) => {
+                    const nuevos = [...relacionesProveedor];
+                    nuevos[i].costoPedido = parseFloat(e.target.value);
+                    setRelacionesProveedor(nuevos);
+                  }}
+                  className="w-full px-3 py-2 mb-2 rounded bg-zinc-700"
+                />
+              </div>
+            ))}
+            <div className="flex justify-end gap-4 mt-4">
+             <button
+                className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
+                onClick={() => {
+                  setModalRelacionAbierto(false);
+                  setProveedorSeleccionado(null);
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-600"
+                onClick={async () => {
+                  try {
+                    const body = relacionesProveedor.map((rel) => ({
+                      idArticulo: rel.idArticulo,
+                      idProveedor: proveedorSeleccionado.idProveedor,
+                      precioUnitario: rel.precioUnitario,
+                      tiempoEntregaDias: rel.tiempoEntregaDias,
+                      costoPedido: rel.costoPedido,
+                    }));
+
+                    const res = await fetch("http://localhost:5000/mod-prov-art", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                    });
+
+                    if (!res.ok) throw new Error("Error al actualizar relación");
+
+                    alert("Relación actualizada correctamente");
+                    setModalRelacionAbierto(false);
+                    setProveedorSeleccionado(null);
+                  } catch (err) {
+                    console.error("Error al actualizar relación proveedor-artículo:", err);
+                    alert("Ocurrió un error");
+                  }
+                }}
+              >
+                Guardar cambios
+              </button>
+      
     </div>
+     </div>
+  </Modal>
+)}
+
+    </div >
   );
 }
