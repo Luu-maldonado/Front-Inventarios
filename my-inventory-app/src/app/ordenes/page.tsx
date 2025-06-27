@@ -9,6 +9,7 @@ interface OrdenDeCompra {
   fechaOrden: string;
   totalPagar: number;
   proveedor: string;
+  idProveedor: number;
   loteSugerido: number;
   estado: string;
 }
@@ -111,25 +112,31 @@ export default function Ordenes() {
   };
 
   const cargarArticulosDeProveedor = async (idProveedor: number) => {
-  try {
-    const res = await fetch(
-      `http://localhost:5000/Proveedor/articulos-proveedor/${idProveedor}`
-    );
-    const data = await res.json();
+    try {
+      const res = await fetch(
+        `http://localhost:5000/Proveedor/articulos-proveedor/${idProveedor}`
+      );
+      const data = await res.json();
 
-    const articulosFormateados = data.map((a: any) => ({
-      idArticulo: a.idArticulo,
-      nombreArticulo: a.nombreArticulo,
-      cantidadArticulos: a.cantidadArticulos ?? 1, 
-      precioSubTotal: a.precioSubTotal ?? 0,
-    }));
+      if (!Array.isArray(data)) {
+        console.error("El backend no devolvió un array:", data);
+        setDetalles([]);
+        return;
+      }
 
-    setDetalles(articulosFormateados);
-  } catch (err) {
-    console.error("Error cargando artículos del proveedor:", err);
-    setDetalles([]);
-  }
-};
+      const articulosFormateados = data.map((a: any) => ({
+        idArticulo: a.idArticulo,
+        nombreArticulo: a.nombreArticulo,
+        cantidadArticulos: 1,
+        precioSubTotal: a.precioSubTotal ?? 0,
+      }));
+
+      setDetalles(articulosFormateados);
+    } catch (err) {
+      console.error("Error cargando artículos del proveedor:", err);
+      setDetalles([]);
+    }
+  };
 
 
   return (
@@ -167,6 +174,17 @@ export default function Ordenes() {
             </option>
           ))}
         </select>
+        <button
+          className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
+          onClick={() => {
+            setModalAbierto(true);
+            setModalTipo("nueva");
+            setOCSeleccionada(null);
+            setDetalles([]);
+          }}
+        >
+          Nueva Orden
+        </button>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-zinc-700">
@@ -205,7 +223,7 @@ export default function Ordenes() {
                         setOCSeleccionada({ ...oc });
                         setModalAbierto(true);
                         setModalTipo("edicion");
-                        cargarArticulosDeProveedor(oc.idProveedor); 
+                        cargarArticulosDeProveedor(oc.idProveedor);
                       }}
                     >
                       <FaEdit />
@@ -244,7 +262,7 @@ export default function Ordenes() {
                     className="border-b border-zinc-600 pb-2"
                   >
                     <p>
-                       <strong>ID:</strong> {det.idArticulo}
+                      <strong>ID:</strong> {det.idArticulo}
                     </p>
                     <p>
                       <strong>Artículo:</strong> {det.nombreArticulo}
@@ -266,174 +284,277 @@ export default function Ordenes() {
       {/*Modal detalles*/}
 
       {modalTipo === "edicion" && ocSeleccionada && (
-  <Modal open={modalAbierto} onClose={cerrarModal}>
-    <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
-      <button
-        onClick={cerrarModal}
-        className="absolute top-2 right-2 text-white text-xl"
-      >
-        &times;
-      </button>
+        <Modal open={modalAbierto} onClose={cerrarModal}>
+          <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
+            <button
+              onClick={cerrarModal}
+              className="absolute top-2 right-2 text-white text-xl"
+            >
+              &times;
+            </button>
 
-      <h2 className="text-xl font-bold mb-4">
-        Editar Orden #{ocSeleccionada.nOrdenCompra}
-      </h2>
+            <h2 className="text-xl font-bold mb-4">
+              Editar Orden #{ocSeleccionada.nOrdenCompra}
+            </h2>
 
-      <div className="mb-4">
-        <label className="block text-sm mb-1">Proveedor:</label>
-        <select
-          className="w-full px-4 py-2 rounded-md bg-zinc-700"
-          value={ocSeleccionada.idProveedor}
-          disabled={ocSeleccionada.estado !== "Pendiente"}
-          onChange={(e) => {
-            const nuevoProveedor = parseInt(e.target.value);
-            setOCSeleccionada((prev) =>
-              prev ? { ...prev, idProveedor: nuevoProveedor } : null
-            );
-            cargarArticulosDeProveedor(nuevoProveedor);
-          }}
-        >
-          {proveedores.map((prov) => (
-            <option key={prov.idProveedor} value={prov.idProveedor}>
-              {prov.nombreProveedor}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <h3 className="text-lg font-semibold mt-4 mb-2">Artículos</h3>
-      <ul className="space-y-2">
-        {detalles?.map((art, idx) => (
-          <li
-            key={art.idArticulo}
-            className="flex items-center justify-between bg-zinc-700 p-3 rounded-md"
-          >
-            <div>
-              <p className="font-medium">{art.nombreArticulo}</p>
-              <p className="text-sm text-zinc-300">ID: {art.idArticulo}</p>
+            <div className="mb-4">
+              <label className="block text-sm mb-1">Proveedor:</label>
+              <select
+                className="w-full px-4 py-2 rounded-md bg-zinc-700"
+                value={ocSeleccionada.idProveedor}
+                disabled={ocSeleccionada.estado !== "Pendiente"}
+                onChange={(e) => {
+                  const nuevoProveedor = parseInt(e.target.value);
+                  setOCSeleccionada((prev) =>
+                    prev ? { ...prev, idProveedor: nuevoProveedor } : null
+                  );
+                  cargarArticulosDeProveedor(nuevoProveedor);
+                }}
+              >
+                {proveedores.map((prov) => (
+                  <option key={prov.idProveedor} value={prov.idProveedor}>
+                    {prov.nombreProveedor}
+                  </option>
+                ))}
+              </select>
             </div>
-            <input
-              type="number"
-              min={1}
-              className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
-              value={art.cantidadArticulos}
-              onChange={(e) => {
-                const nuevaCantidad = parseInt(e.target.value);
-                const copia = [...detalles];
-                copia[idx].cantidadArticulos = nuevaCantidad;
-                setDetalles(copia);
-              }}
-            />
-          </li>
-        ))}
-      </ul>
-      <div className="mt-6">
-      </div>
-      <div className="flex justify-end mt-6 gap-4">
-        <button
-          className="px-4 py-2 rounded-md bg-gray-500 hover:bg-gray-600"
-          onClick={cerrarModal}
-        >
-          Cancelar
-        </button>
 
-        <button
-          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700"
-          onClick={async () => {
-            const body = {
-              nOrdenCompra: ocSeleccionada.nOrdenCompra,
-              idProveedor: ocSeleccionada.idProveedor,
-              articulos: detalles.map((d) => ({
-                idArticulo: d.idArticulo,
-                cantidad: d.cantidadArticulos,
-              })),
-            };
+            <h3 className="text-lg font-semibold mt-4 mb-2">Artículos</h3>
+            <ul className="space-y-2">
+              {detalles?.map((art, idx) => (
+                <li
+                  key={art.idArticulo}
+                  className="flex items-center justify-between bg-zinc-700 p-3 rounded-md"
+                >
+                  <div>
+                    <p className="font-medium">{art.nombreArticulo}</p>
+                    <p className="text-sm text-zinc-300">ID: {art.idArticulo}</p>
+                  </div>
+                  <input
+                    type="number"
+                    min={1}
+                    className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
+                    value={art.cantidadArticulos}
+                    onChange={(e) => {
+                      const nuevaCantidad = parseInt(e.target.value);
+                      const copia = [...detalles];
+                      copia[idx].cantidadArticulos = nuevaCantidad;
+                      setDetalles(copia);
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6">
+            </div>
+            <div className="flex justify-end mt-6 gap-4">
+              <button
+                className="px-4 py-2 rounded-md bg-gray-500 hover:bg-gray-600"
+                onClick={cerrarModal}
+              >
+                Cancelar
+              </button>
 
-            try {
-              const res = await fetch(`http://localhost:5000/OrdenCompra/modificar-orden/${ocSeleccionada.nOrdenCompra}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-              });
+              <button
+                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700"
+                onClick={async () => {
+                  const body = {
+                    nOrdenCompra: ocSeleccionada.nOrdenCompra,
+                    idProveedor: ocSeleccionada.idProveedor,
+                    articulos: detalles.map((d) => ({
+                      idArticulo: d.idArticulo,
+                      cantidad: d.cantidadArticulos,
+                    })),
+                  };
 
-              if (!res.ok) throw new Error("Error al modificar la orden");
-              alert("Orden modificada correctamente.");
-              cerrarModal();
-            } catch (error) {
-              alert("Error: " + error.message);
-            }
-          }}
-        >
-          Guardar cambios
-        </button>
+                  try {
+                    const res = await fetch(`http://localhost:5000/OrdenCompra/modificar-orden`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                    });
 
-        {ocSeleccionada.estado === "Pendiente" && (
-          <>
+                    if (!res.ok) throw new Error("Error al modificar la orden");
+                    alert("Orden modificada correctamente.");
+                    cerrarModal();
+                  } catch (error) {
+                    alert("Error: " + error.message);
+                  }
+                }}
+              >
+                Guardar cambios
+              </button>
+
+              {ocSeleccionada.estado === "Pendiente" && (
+                <>
+                  <button
+                    className="px-4 py-2 rounded-md bg-yellow-600 hover:bg-yellow-700"
+                    onClick={async () => {
+                      await fetch(
+                        `http://localhost:5000/OrdenCompra/confirmar-orden/${ocSeleccionada.nOrdenCompra}`,
+                        { method: "POST" }
+                      );
+                      alert("Orden confirmada.");
+                      cerrarModal();
+                    }}
+                  >
+                    Confirmar
+                  </button>
+
+                  <button
+                    className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700"
+                    onClick={async () => {
+                      await fetch(
+                        `http://localhost:5000/OrdenCompra/cancelar/${ocSeleccionada.nOrdenCompra}`,
+                        { method: "POST" }
+                      );
+                      alert("Orden cancelada.");
+                      cerrarModal();
+                    }}
+                  >
+                    Cancelar OC
+                  </button>
+                </>
+              )}
+
+              {ocSeleccionada.estado === "Enviada" && (
+                <button
+                  className="px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700"
+                  onClick={async () => {
+                    await fetch(
+                      `http://localhost:5000/OrdenCompra/orden-enproceso/${ocSeleccionada.nOrdenCompra}`,
+                      { method: "POST" }
+                    );
+                    alert("Estado cambiado a 'En proceso'");
+                    cerrarModal();
+                  }}
+                >
+                  Marcar En Proceso
+                </button>
+              )}
+
+              {ocSeleccionada.estado === "En proceso" && (
+                <button
+                  className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
+                  onClick={async () => {
+                    await fetch(
+                      `http://localhost:5000/OrdenCompra/registrar-entrada/${ocSeleccionada.nOrdenCompra}`,
+                      { method: "POST" }
+                    );
+                    alert("Entrada registrada");
+                    cerrarModal();
+                  }}
+                >
+                  Registrar Entrada
+                </button>
+              )}
+            </div>
+          </div>
+        </Modal>
+      )}
+      {/* Modal agregar orden */}
+      {modalTipo === "nueva" && (
+        <Modal open={modalAbierto} onClose={cerrarModal}>
+          <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
             <button
-              className="px-4 py-2 rounded-md bg-yellow-600 hover:bg-yellow-700"
-              onClick={async () => {
-                await fetch(
-                  `http://localhost:5000/OrdenCompra/confirmar-orden/${ocSeleccionada.nOrdenCompra}`,
-                  { method: "POST" }
-                );
-                alert("Orden confirmada.");
-                cerrarModal();
-              }}
+              onClick={cerrarModal}
+              className="absolute top-2 right-2 text-white text-xl"
             >
-              Confirmar
+              &times;
             </button>
 
-            <button
-              className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700"
-              onClick={async () => {
-                await fetch(
-                  `http://localhost:5000/OrdenCompra/cancelar/${ocSeleccionada.nOrdenCompra}`,
-                  { method: "POST" }
-                );
-                alert("Orden cancelada.");
-                cerrarModal();
-              }}
-            >
-              Cancelar OC
-            </button>
-          </>
-        )}
+            <h2 className="text-xl font-bold mb-4">Crear Nueva Orden</h2>
 
-        {ocSeleccionada.estado === "Enviada" && (
-          <button
-            className="px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700"
-            onClick={async () => {
-              await fetch(
-                `http://localhost:5000/OrdenCompra/orden-enproceso/${ocSeleccionada.nOrdenCompra}`,
-                { method: "POST" }
-              );
-              alert("Estado cambiado a 'En proceso'");
-              cerrarModal();
-            }}
-          >
-            Marcar En Proceso
-          </button>
-        )}
+            <div className="mb-4">
+              <label className="block text-sm mb-1">Proveedor:</label>
+              <select
+                className="w-full px-4 py-2 rounded-md bg-zinc-700"
+                onChange={async (e) => {
+                  const idProv = parseInt(e.target.value);
+                  setOCSeleccionada({ nOrdenCompra: 0, fechaOrden: "", totalPagar: 0, proveedor: "", idProveedor: idProv, loteSugerido: 0, estado: "Pendiente" });
+                  await cargarArticulosDeProveedor(idProv);
+                }}
+              >
+                <option value="">Seleccione un proveedor</option>
+                {proveedores.map((prov) => (
+                  <option key={prov.idProveedor} value={prov.idProveedor}>
+                    {prov.nombreProveedor}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {ocSeleccionada.estado === "En proceso" && (
-          <button
-            className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
-            onClick={async () => {
-              await fetch(
-                `http://localhost:5000/OrdenCompra/registrar-entrada/${ocSeleccionada.nOrdenCompra}`,
-                { method: "POST" }
-              );
-              alert("Entrada registrada");
-              cerrarModal();
-            }}
-          >
-            Registrar Entrada
-          </button>
-        )}
-      </div>
-    </div>
-  </Modal>
-)}
+            {detalles.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold mt-4 mb-2">Artículos</h3>
+                <ul className="space-y-2">
+                  {detalles.map((art, idx) => (
+                    <li
+                      key={art.idArticulo}
+                      className="flex items-center justify-between bg-zinc-700 p-3 rounded-md"
+                    >
+                      <div>
+                        <p className="font-medium">{art.nombreArticulo}</p>
+                        <p className="text-sm text-zinc-300">ID: {art.idArticulo}</p>
+                      </div>
+                      <input
+                        type="number"
+                        min={1}
+                        className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
+                        value={art.cantidadArticulos}
+                        onChange={(e) => {
+                          const nuevaCantidad = parseInt(e.target.value);
+                          const copia = [...detalles];
+                          copia[idx].cantidadArticulos = nuevaCantidad;
+                          setDetalles(copia);
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            <div className="flex justify-end mt-6 gap-4">
+              <button
+                className="px-4 py-2 rounded-md bg-gray-500 hover:bg-gray-600"
+                onClick={cerrarModal}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700"
+                onClick={async () => {
+                  try {
+                    const body = {
+                      idProveedor: ocSeleccionada?.idProveedor,
+                      articulos: detalles.map((d) => ({
+                        idArticulo: d.idArticulo,
+                        cantidad: d.cantidadArticulos,
+                      })),
+                    };
+
+                    const res = await fetch("http://localhost:5000/OrdenCompra/generar-orden", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                    });
+
+                    if (!res.ok) throw new Error("No se pudo crear la orden.");
+                    alert("Orden creada correctamente");
+                    cerrarModal();
+                  } catch (err) {
+                    alert("Error al crear orden: " + err.message);
+                  }
+                }}
+              >
+                Crear Orden
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
