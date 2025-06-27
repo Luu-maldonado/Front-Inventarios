@@ -81,48 +81,6 @@ export default function Proveedores() {
     art.nombreArticulo.toLowerCase().includes(filtroArticulo.toLowerCase())
   );
 
-  {/*const toggleArticulo = (idArticulo: number) => {
-    if (!proveedorSeleccionado) return;
-
-    const yaSeleccionado = proveedorSeleccionado.articulos.includes(idArticulo);
-    const nuevosArticulos = yaSeleccionado
-      ? proveedorSeleccionado.articulos.filter((id) => id !== idArticulo)
-      : [...proveedorSeleccionado.articulos, idArticulo];
-
-    setProveedorSeleccionado({ ...proveedorSeleccionado, articulos: nuevosArticulos });
-  };*/}
-  {/*const abrirModalRelacion = async (proveedor: Proveedor) => {
-    try {
-      const res = await fetch(`http://localhost:5000/ProveedorArticulo/por-proveedor/${proveedor.idProveedor}`);
-      if (!res.ok) throw new Error("Error al cargar relaciones");
-
-      const data: {
-        idArticulo: number;
-        precioUnitario: number;
-        tiempoEntregaDias: number;
-        costoPedido: number;
-      }[] = await res.json();
-
-      const relaciones: RelacionArticulo[] = data.map((r) => {
-        const articulo = articulos.find((a: Articulo) => a.idArticulo === r.idArticulo);
-        return {
-          idArticulo: r.idArticulo,
-          nombreArticulo: articulo?.nombreArticulo || "Artículo sin nombre",
-          precioUnitario: r.precioUnitario,
-          tiempoEntregaDias: r.tiempoEntregaDias,
-          costoPedido: r.costoPedido,
-        };
-      });
-
-      setProveedorSeleccionado(proveedor);
-      setRelacionesProveedor(relaciones);
-      setModalRelacionAbierto(true);
-    } catch (err) {
-      console.error("Error al abrir modal de relación:", err);
-      alert("No se pudo cargar la relación proveedor-artículos");
-    }
-  };*/}
-
 
   return (
     <div className="text-white mt-12 mx-6">
