@@ -84,8 +84,7 @@ export default function Articulos() {
   const [modeloSeleccionado, setModeloSeleccionado] = useState('');
   const [modalProveedor, setModalProveedor] = useState<Articulo | null>(null);
   const [proveedoresArticulo, setProveedoresArticulo] = useState<ProveedorArticulo[]>([]);
-
-
+  const [tiempoRevision, setTiempoRevision] = useState<number>(0);
 
   useEffect(() => {
     obtenerArticulos();
@@ -390,14 +389,19 @@ export default function Articulos() {
               <input name="nombreArticulo" placeholder="Nombre" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
               <input name="descripcion" placeholder="Descripción" className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
               <input name="demandaDiaria" type="number" placeholder="Demanda Diaria" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
-              <input name="tiempoRevision" type="number" placeholder="Tiempo Revision" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
+              <input name="tiempoRevision" type="number" placeholder="Tiempo Revision" min={0} max={10000}  disabled={modeloSeleccionado !== 2} value={tiempoRevision} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required={modeloSeleccionado === 2} />
               <input name="costoAlmacen" type="number" placeholder="Costo Almacenaje" min={0} max={10000} className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded" required />
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="text-white block mb-1">Seleccionar modelo de Inventario</label>
                   <select
                     name="modeloInv"
-                    className="w-full px-2 py-1 rounded bg-gray-700 text-white">
+                    className="w-full px-2 py-1 rounded bg-gray-700 text-white"
+                      onChange={(e) => {
+                          const val = e.target.value;
+                        setModeloSeleccionado(val ? parseInt(val, 10) : null);
+                        }}
+                      >
                     <option value="">Seleccionar modelo</option>
                     {modelosInventario.map((modelo: ModeloInventario) => (
                       <option key={modelo.id} value={modelo.id}>

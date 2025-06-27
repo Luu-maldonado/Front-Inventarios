@@ -10,7 +10,7 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ title, children, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-      <div className="bg-zinc-900 rounded-xl p-6 max-w-md w-full relative shadow-lg border border-zinc-700">
+      <div className="bg-zinc-900 rounded-xl p-6 max-w-[40rem] w-full max-h-[85vh] relative shadow-lg border border-zinc-700">
         <button
           className="absolute top-3 right-3 text-white hover:text-red-400"
           onClick={onClose}
