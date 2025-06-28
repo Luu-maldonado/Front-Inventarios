@@ -14,15 +14,15 @@ interface Articulo {
   idArticulo?: number;
   nombreArticulo: string;
   descripcion: string;
-  proveedor: string;
+  proveedor?: string;
   modeloInv: number;
   categoriaArt: number;
   demandaDiaria: number;
   tiempoRevision: number;
-  stockActual: number;
-  stockSeguridad: number;
-  puntoPedido: string;
-  cgi: string;
+  stockActual?: number;
+  stockSeguridad?: number;
+  puntoPedido?: string;
+  cgi?: string;
   costoAlmacen: number;
   costoPedido?: number;
   costoCompra?: number;
@@ -54,7 +54,7 @@ interface ProveedorArticulo {
   tiempoEntregaDias: number;
   idArticulo: number;
   predeterminado: boolean;
-  fechaFinProveedorArticulo?: string; 
+  fechaFinProveedorArticulo?: string;
   costoPedido: number;
 }
 
@@ -101,6 +101,10 @@ export default function Articulos() {
     ArticuloAReponer[]
   >([]);
   const [modalReposicionAbierto, setModalReposicionAbierto] = useState(false);
+  const [articulosFaltantes, setArticulosFaltantes] = useState<
+    ArticuloAReponer[]
+  >([]);
+  const [modalFaltantesAbierto, setModalFaltantesAbierto] = useState(false);
 
   useEffect(() => {
     obtenerArticulos();
@@ -135,8 +139,7 @@ export default function Articulos() {
 
       if (!res.ok) throw new Error("Error en la creación del artículo");
 
-      const data = await res.json();
-      setArticulos((prev) => [...prev, data]);
+      await obtenerArticulos();
       setModalAgregar(false);
     } catch (error) {
       console.error("Error al agregar el artículo:", error);
@@ -186,8 +189,7 @@ export default function Articulos() {
 
       alert("Artículo actualizado correctamente.");
       setModalEditar(null);
-      // Si tenés una función para recargar la lista de artículos, llamala acá
-      // await fetchArticulos();
+      await obtenerArticulos();
     } catch (error) {
       console.error(error);
       alert("Ocurrió un error al actualizar el artículo.");
@@ -236,8 +238,7 @@ export default function Articulos() {
       );
 
       alert("Artículo eliminado correctamente.");
-      // Actualizar lista
-      obtenerArticulos(); // Asegurate de tener esta función para volver a cargar los artículos
+      obtenerArticulos();
     } catch (error) {
       console.error("Error eliminando el artículo:", error);
       alert("Ocurrió un error al intentar eliminar el artículo.");
@@ -288,8 +289,9 @@ export default function Articulos() {
       );
       if (!res.ok) throw new Error("Error al obtener cálculos");
       const data = await res.json();
-      setCalculosInventario(data); // suponiendo que devuelve array directo
+      setCalculosInventario(data); 
       setModalCalculoGlobal(true);
+      obtenerArticulos();
     } catch (error) {
       console.error("Error al cargar cálculos:", error);
       alert("No se pudieron cargar los cálculos de inventario.");
@@ -316,6 +318,21 @@ export default function Articulos() {
     } catch (error) {
       console.error("Error al cargar artículos a reponer:", error);
       alert("No se pudieron cargar los artículos a reponer.");
+    }
+  };
+
+  const cargarArticulosFaltantes = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/MaestroArticulos/articuloslista/faltantes"
+      );
+      if (!res.ok) throw new Error("Error al obtener artículos faltantes");
+      const data = await res.json();
+      setArticulosFaltantes(data);
+      setModalFaltantesAbierto(true);
+    } catch (error) {
+      console.error("Error al cargar artículos faltantes:", error);
+      alert("No se pudieron cargar los artículos faltantes.");
     }
   };
 
@@ -352,7 +369,14 @@ export default function Articulos() {
         >
           <FaSearch className="inline-block mr-1" /> A Reponer
         </button>
+        <button
+          onClick={cargarArticulosFaltantes}
+          className="ml-4 bg-gradient-to-r from-yellow-400 to-cyan-400 px-4 py-2 rounded text-black font-bold hover:opacity-90"
+        >
+          <FaSearch className="inline-block mr-1" /> Faltantes
+        </button>
       </div>
+
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse text-sm">
           <thead className="bg-zinc-900 text-zinc-300">
@@ -373,45 +397,55 @@ export default function Articulos() {
             </tr>
           </thead>
           <tbody>
-            {filtrados.map((art) => (
-              <tr key={art.idArticulo} className="hover:bg-zinc-800">
-                <td className="px-2 py-1 border">{art.idArticulo}</td>
-                <td className="px-2 py-1 border">{art.nombreArticulo}</td>
-                <td className="px-2 py-1 border">{art.descripcion}</td>
-                <td className="px-2 py-1 border">{art.categoriaArt}</td>
-                <td className="px-2 py-1 border">
-                  {art.proveedor?.trim() ? art.proveedor : "sin asignar"}
-                </td>
-                <td className="px-2 py-1 border">{art.modeloInv}</td>
-                <td className="px-2 py-1 border">{art.stockActual}</td>
-                <td className="px-2 py-1 border">{art.stockSeguridad}</td>
-                <td className="px-2 py-1 border">{art.puntoPedido}</td>
-                <td className="px-2 py-1 border">{art.cgi}</td>
-                <td className="px-2 py-1 border">{art.demandaDiaria}</td>
-                <td className="px-2 py-1 border">{art.tiempoRevision}</td>
-                <td className="px-2 py-1 border">${art.costoAlmacen}</td>
-                <td className="px-3 py-2 border border-gray-700 text-center">
-                  <button
-                    onClick={() => setModalEditar(art)}
-                    className="mr-2 hover:text-yellow-300"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleEliminar(art.idArticulo!)}
-                    className="hover:text-red-500"
-                  >
-                    <FaTrash />
-                  </button>
-                  <button
-                    onClick={() => abrirModalProveedor(art)}
-                    className="ml-2 text-yellow-300 hover:text-yellow-400"
-                  >
-                    <FaUserTie />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filtrados.map((art) => {
+              const stock = art.stockActual ?? 0;
+              const puntoPedido = parseFloat(art.puntoPedido ?? "0");
+              const stockBajo = stock < puntoPedido;
+              return (
+                <tr
+                  key={art.idArticulo}
+                  className={`hover:bg-zinc-800 ${
+                    stockBajo ? "bg-red-700 text-white" : ""
+                  }`}
+                >
+                  <td className="px-2 py-1 border">{art.idArticulo}</td>
+                  <td className="px-2 py-1 border">{art.nombreArticulo}</td>
+                  <td className="px-2 py-1 border">{art.descripcion}</td>
+                  <td className="px-2 py-1 border">{art.categoriaArt}</td>
+                  <td className="px-2 py-1 border">
+                    {art.proveedor?.trim() ? art.proveedor : "sin asignar"}
+                  </td>
+                  <td className="px-2 py-1 border">{art.modeloInv}</td>
+                  <td className="px-2 py-1 border">{art.stockActual}</td>
+                  <td className="px-2 py-1 border">{art.stockSeguridad}</td>
+                  <td className="px-2 py-1 border">{art.puntoPedido}</td>
+                  <td className="px-2 py-1 border">{art.cgi}</td>
+                  <td className="px-2 py-1 border">{art.demandaDiaria}</td>
+                  <td className="px-2 py-1 border">{art.tiempoRevision}</td>
+                  <td className="px-2 py-1 border">${art.costoAlmacen}</td>
+                  <td className="px-3 py-2 border border-gray-700 text-center">
+                    <button
+                      onClick={() => setModalEditar(art)}
+                      className="mr-2 hover:text-yellow-300"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleEliminar(art.idArticulo!)}
+                      className="hover:text-red-500"
+                    >
+                      <FaTrash />
+                    </button>
+                    <button
+                      onClick={() => abrirModalProveedor(art)}
+                      className="ml-2 text-yellow-300 hover:text-yellow-400"
+                    >
+                      <FaUserTie />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -494,7 +528,7 @@ export default function Articulos() {
                 min={0}
                 max={10000}
                 className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
-                required={modeloSeleccionado === 2}
+                required={parseInt(modeloSeleccionado) === 2}
               />
               <input
                 name="costoAlmacen"
@@ -514,8 +548,7 @@ export default function Articulos() {
                     name="modeloInv"
                     className="w-full px-2 py-1 rounded bg-gray-700 text-white"
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setModeloSeleccionado(val ? parseInt(val, 10) : null);
+                      setModeloSeleccionado(e.target.value);
                     }}
                   >
                     <option value="">Seleccionar modelo</option>
@@ -729,7 +762,7 @@ export default function Articulos() {
                     className="bg-blue-600 px-2 py-1 rounded mt-2"
                     onClick={() =>
                       establecerProveedorPredeterminado(
-                        modalProveedor.idArticulo,
+                        modalProveedor.idArticulo!,
                         prov.idProveedor
                       )
                     }
@@ -827,6 +860,41 @@ export default function Articulos() {
                 </thead>
                 <tbody>
                   {articulosAReponer.map((art) => (
+                    <tr key={art.idArticulo} className="hover:bg-zinc-800">
+                      <td className="px-2 py-1 border">{art.idArticulo}</td>
+                      <td className="px-2 py-1 border">{art.nombreArticulo}</td>
+                      <td className="px-2 py-1 border">{art.stockActual}</td>
+                      <td className="px-2 py-1 border">{art.puntoPedido}</td>
+                      <td className="px-2 py-1 border">{art.stockSeguridad}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </Modal>
+      )}
+      {modalFaltantesAbierto && (
+        <Modal
+          title="Artículos Faltantes"
+          onClose={() => setModalFaltantesAbierto(false)}
+        >
+          <div className="max-h-[80vh] overflow-y-auto p-4 text-sm text-white">
+            {articulosFaltantes.length === 0 ? (
+              <p>No hay artículos faltantes.</p>
+            ) : (
+              <table className="w-full table-auto border-collapse text-sm">
+                <thead className="bg-zinc-900 text-zinc-300">
+                  <tr>
+                    <th className="px-2 py-1 border">ID</th>
+                    <th className="px-2 py-1 border">Nombre</th>
+                    <th className="px-2 py-1 border">Stock Actual</th>
+                    <th className="px-2 py-1 border">Punto Pedido</th>
+                    <th className="px-2 py-1 border">Stock Seguridad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {articulosFaltantes.map((art) => (
                     <tr key={art.idArticulo} className="hover:bg-zinc-800">
                       <td className="px-2 py-1 border">{art.idArticulo}</td>
                       <td className="px-2 py-1 border">{art.nombreArticulo}</td>
