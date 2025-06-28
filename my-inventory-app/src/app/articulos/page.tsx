@@ -336,6 +336,20 @@ export default function Articulos() {
     }
   };
 
+  const modeloSeleccionadoNombre = modelosInventario.find(
+    (m) => m.id === Number(modeloSeleccionado)
+  )?.nombreModInv;
+
+  const esLoteFijoQ = modeloSeleccionadoNombre?.includes("LoteFijo_Q");
+  const esPeriodoFijoP = modeloSeleccionadoNombre?.includes("PeriodoFijo_P");
+
+  const modeloSeleccionadoNombreEditar = modelosInventario.find(
+    (m) => m.id === Number(modeloSeleccionado)
+  )?.nombreModInv;
+
+  const esLoteFijoQEditar = modeloSeleccionadoNombreEditar?.includes("LoteFijo_Q");
+  const esPeriodoFijoPEditar = modeloSeleccionadoNombreEditar?.includes("PeriodoFijo_P");
+ 
   return (
     <div className="text-white px-6 py-10">
       <h1 className="text-3xl font-bold mb-6">Artículos</h1>
@@ -464,8 +478,8 @@ export default function Articulos() {
                 const modeloInv = parseInt(form.modeloInv.value, 10);
                 const categoriaArt = parseInt(form.categoriaArticulo.value, 10);
                 const demandaDiaria = parseFloat(form.demandaDiaria.value);
-                const tiempoRevision = parseFloat(form.tiempoRevision.value);
                 const costoAlmacen = parseFloat(form.costoAlmacen.value);
+                const tiempoRevision = esLoteFijoQ ? 0 : parseFloat(form.tiempoRevision.value);
 
                 const nuevo = {
                   nombreArticulo,
@@ -512,33 +526,6 @@ export default function Articulos() {
                 className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
                 required
               />
-              <input
-                name="demandaDiaria"
-                type="number"
-                placeholder="Demanda Diaria"
-                min={0}
-                max={10000}
-                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
-                required
-              />
-              <input
-                name="tiempoRevision"
-                type="number"
-                placeholder="Tiempo Revision"
-                min={0}
-                max={10000}
-                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
-                required={parseInt(modeloSeleccionado) === 2}
-              />
-              <input
-                name="costoAlmacen"
-                type="number"
-                placeholder="Costo Almacenaje"
-                min={0}
-                max={10000}
-                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
-                required
-              />
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="text-white block mb-1">
@@ -576,6 +563,35 @@ export default function Articulos() {
                   </select>
                 </div>
               </div>
+              <input
+                name="demandaDiaria"
+                type="number"
+                placeholder="Demanda Diaria"
+                min={0}
+                max={1000}
+                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
+                required
+              />
+              <input
+                name="tiempoRevision"
+                type="number"
+                placeholder="Tiempo Revision"
+                min={0}
+                max={1000}
+                value={esLoteFijoQ ? 0 : undefined}
+                disabled={esLoteFijoQ}
+                required={esPeriodoFijoP}
+                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
+              />
+              <input
+                name="costoAlmacen"
+                type="number"
+                placeholder="Costo Almacenaje"
+                min={0}
+                max={1000}
+                className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
+                required
+              />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
@@ -607,6 +623,7 @@ export default function Articulos() {
 
                 const modeloInvParsed = Number(modeloSeleccionado);
                 const categoriaArtParsed = Number(categoriaSeleccionada);
+                const tiempoRevision = esLoteFijoQEditar ? 0 : Number(form.tiempoRevision.value);
 
                 const articuloEditado = {
                   idArticulo: modalEditar.idArticulo,
@@ -615,7 +632,7 @@ export default function Articulos() {
                   modeloInv: modeloInvParsed,
                   categoriaArt: categoriaArtParsed,
                   demandaDiaria: Number(form.demandaDiaria.value),
-                  tiempoRevision: Number(form.tiempoRevision.value),
+                  tiempoRevision: tiempoRevision,
                   costoAlmacen: Number(form.costoAlmacen.value),
                 };
                 console.log(
@@ -648,11 +665,12 @@ export default function Articulos() {
               <label className="text-white block mb-1">
                 Categoria articulo
               </label>
+              <p>Categoria seleccionada antes: {categoriaSeleccionada}</p>
               <select
                 name="idCategoriaArticulo"
                 className="w-full px-2 py-1 rounded bg-gray-700 text-white"
                 required
-                value={categoriaSeleccionada}
+                defaultValue={categoriaSeleccionada}
                 onChange={(e) => setCategoriaSeleccionada(e.target.value)}
               >
                 <option value="">Seleccionar categoria</option>
@@ -662,11 +680,12 @@ export default function Articulos() {
                   </option>
                 ))}
               </select>
+              <p>Modelo seleccionado antes: {modeloSeleccionado}</p>
               <label className="text-white block mb-1">Modelo inventario</label>
               <select
                 name="modeloInv"
                 required
-                value={modeloSeleccionado}
+                defaultValue={modeloSeleccionado}
                 onChange={(e) => setModeloSeleccionado(e.target.value)}
                 className="w-full px-2 py-1 rounded bg-gray-700 text-white"
               >
@@ -692,8 +711,9 @@ export default function Articulos() {
               <input
                 name="tiempoRevision"
                 placeholder="Tiempo de Revisión"
-                required
-                defaultValue={modalEditar.tiempoRevision}
+                value={esLoteFijoQ ? 0 : undefined}
+                defaultValue={esLoteFijoQEditar ? 0 : modalEditar.tiempoRevision}
+                required={esPeriodoFijoPEditar}
                 className="w-full p-2 bg-zinc-800 border border-zinc-600 rounded"
               />
               <label className="text-white block mb-1">
