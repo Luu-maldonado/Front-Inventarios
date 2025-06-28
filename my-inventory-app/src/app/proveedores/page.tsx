@@ -22,10 +22,19 @@ interface Articulo {
 
 interface RelacionArticulo {
   idArticulo: number;
-  nombreArticulo: string;
+  nombreArticulo?: string;
   precioUnitario: number;
   tiempoEntregaDias: number;
   costoPedido: number;
+}
+
+interface ProveedorBackend {
+  idProveedor: number;
+  nombreProveedor: string;
+  direccion?: string;
+  mail?: string;
+  telefono?: string;
+  masterArticulo?: number;
 }
 
 export default function Proveedores() {
@@ -33,13 +42,16 @@ export default function Proveedores() {
   const [articulos, setArticulos] = useState<Articulo[]>([]);
   const [filtro, setFiltro] = useState("");
   const [filtroArticulo, setFiltroArticulo] = useState("");
-  const [proveedorSeleccionado, setProveedorSeleccionado] = useState({
-    idProveedor: 0,
-    nombreProveedor: "",
-    direccion: "",
-    mail: "",
-    telefono: "",
-  });
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor>(
+    {
+      idProveedor: 0,
+      nombreProveedor: "",
+      direccion: "",
+      mail: "",
+      telefono: "",
+      articulos: [],
+    }
+  );
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
   const [modalRelacionAbierto, setModalRelacionAbierto] = useState(false);
@@ -55,8 +67,20 @@ export default function Proveedores() {
       costoPedido: number;
     }[]
   >([]);
+  const proveedorVacio: Proveedor = {
+    idProveedor: 0,
+    nombreProveedor: "",
+    direccion: "",
+    mail: "",
+    telefono: "",
+    articulos: [],
+  };
 
-  const actualizarRelacion = (index, campo, valor) => {
+  const actualizarRelacion = (
+    index: number,
+    campo: keyof RelacionArticulo,
+    valor: number | string
+  ) => {
     setNuevasRelaciones((prev) => {
       const nuevas = [...prev];
       nuevas[index] = {
@@ -67,12 +91,12 @@ export default function Proveedores() {
     });
   };
 
-  useEffect(() => {
+  const loadProveedores = () => {
     fetch("http://localhost:5000/Proveedor/activos")
       .then((res) => res.json())
       .then((data) => {
         console.log("Proveedores desde el back:", data);
-        const proveedoresAdaptados = data.map((prov: any) => ({
+        const proveedoresAdaptados = data.map((prov: ProveedorBackend) => ({
           idProveedor: prov.idProveedor,
           nombreProveedor: prov.nombreProveedor,
           direccion: prov.direccion,
@@ -84,8 +108,12 @@ export default function Proveedores() {
         setProveedores(proveedoresAdaptados);
       })
       .catch((err) => console.error("Error cargando proveedores:", err));
-  }, 
-  []);
+  };
+
+  useEffect(() => {
+  loadProveedores();
+  }, []);
+
 
   const proveedoresFiltrados = proveedores.filter(
     (p) =>
@@ -97,7 +125,7 @@ export default function Proveedores() {
     fetch("http://localhost:5000/MaestroArticulos/articulos/list-art-datos")
       .then((res) => res.json())
       .then((data) => {
-        const articulosAdaptados = data.map((art: any) => ({
+        const articulosAdaptados = data.map((art: Articulo) => ({
           idArticulo: art.idArticulo,
           nombreArticulo: art.nombreArticulo,
         }));
@@ -129,7 +157,7 @@ export default function Proveedores() {
               direccion: "",
               mail: "",
               telefono: "",
-              Articulos: [],
+              articulos: [],
             });
             setModalAbierto(true);
           }}
@@ -181,6 +209,7 @@ export default function Proveedores() {
                       setProveedores((prev) =>
                         prev.filter((p) => p.idProveedor !== prov.idProveedor)
                       );
+                      loadProveedores();
                     } catch (err) {
                       console.error("Error al eliminar proveedor:", err);
                       alert("Ocurrió un error al eliminar el proveedor");
@@ -209,16 +238,18 @@ export default function Proveedores() {
                       const data = await res.json();
 
                       // Enlazamos los datos con nombreArticulo a partir del listado global `articulos`
-                      const relacionesConNombre = data.map((rel) => {
-                        const art = articulos.find(
-                          (a) => a.idArticulo === rel.idArticulo
-                        );
-                        return {
-                          ...rel,
-                          nombreArticulo:
-                            art?.nombreArticulo || "Artículo sin nombre",
-                        };
-                      });
+                      const relacionesConNombre = data.map(
+                        (rel: RelacionArticulo) => {
+                          const art = articulos.find(
+                            (a) => a.idArticulo === rel.idArticulo
+                          );
+                          return {
+                            ...rel,
+                            nombreArticulo:
+                              art?.nombreArticulo || "Artículo sin nombre",
+                          };
+                        }
+                      );
 
                       setProveedorSeleccionado(proveedorConArticulos);
                       setRelacionesProveedor(relacionesConNombre);
@@ -253,9 +284,10 @@ export default function Proveedores() {
           </div>
         ))}
       </div>
-      {/* Modal crear proveedor*/}
+
       {modalAbierto && (
         <Modal
+          title="Agregar Proveedor"
           open={modalAbierto}
           onClose={() => {
             setModalAbierto(false);
@@ -278,7 +310,7 @@ export default function Proveedores() {
               <input
                 placeholder="Nombre del proveedor"
                 className="w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 mb-3"
-                value={proveedorSeleccionado.nombreProveedor}
+                value={proveedorSeleccionado!.nombreProveedor}
                 onChange={(e) =>
                   setProveedorSeleccionado({
                     ...proveedorSeleccionado,
@@ -434,7 +466,7 @@ export default function Proveedores() {
                   className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
                   onClick={() => {
                     setModalAbierto(false);
-                    setProveedorSeleccionado(null);
+                    setProveedorSeleccionado(proveedorVacio);
                   }}
                 >
                   Cancelar
@@ -472,11 +504,11 @@ export default function Proveedores() {
                           )
                           .map((rel) => {
                             const articulo = articulos.find(
-                              (a) => a.id === rel.idArticulo
+                              (a) => a.idArticulo === rel.idArticulo
                             );
                             return {
                               idArticulo: rel.idArticulo,
-                              nombreArticulo: articulo?.nombre || "",
+                              nombreArticulo: articulo?.nombreArticulo || "",
                               precioUnitario: parseFloat(
                                 rel.precioUnitario?.toString() || "0"
                               ),
@@ -507,6 +539,7 @@ export default function Proveedores() {
 
                       alert("✅ Proveedor creado correctamente");
                       setModalAbierto(false);
+                      loadProveedores();
                     } catch (error) {
                       alert("❌ Error al crear el proveedor con artículos.");
                       console.error(error);
@@ -521,13 +554,13 @@ export default function Proveedores() {
         </Modal>
       )}
 
-      {/* Modal editar proveedor*/}
       {modalEditarAbierto && proveedorSeleccionado && (
         <Modal
+          title="Editar Proveedor"
           open={modalEditarAbierto}
           onClose={() => {
             setModalEditarAbierto(false);
-            setProveedorSeleccionado(null);
+            setProveedorSeleccionado(proveedorVacio);
           }}
         >
           <div className="text-white p-4">
@@ -582,7 +615,7 @@ export default function Proveedores() {
                 className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
                 onClick={() => {
                   setModalEditarAbierto(false);
-                  setProveedorSeleccionado(null);
+                  setProveedorSeleccionado(proveedorVacio);
                 }}
               >
                 Cancelar
@@ -614,8 +647,8 @@ export default function Proveedores() {
 
                     alert("Proveedor actualizado correctamente");
                     setModalEditarAbierto(false);
-                    setProveedorSeleccionado(null);
-                    window.location.reload(); // o actualizá la lista localmente si preferís
+                    setProveedorSeleccionado(proveedorVacio);
+                    loadProveedores();
                   } catch (err) {
                     console.error("Error al actualizar proveedor:", err);
                     alert("Ocurrió un error al actualizar el proveedor");
@@ -629,13 +662,13 @@ export default function Proveedores() {
         </Modal>
       )}
 
-      {/* Modal editar relación proveedor-artículos */}
       {modalRelacionAbierto && proveedorSeleccionado && (
         <Modal
+          title="Editar relacion proveedor-articulos"
           open={modalRelacionAbierto}
           onClose={() => {
             setModalRelacionAbierto(false);
-            setProveedorSeleccionado(null);
+            setProveedorSeleccionado(proveedorVacio);
             setRelacionesProveedor([]);
             setNuevasRelaciones([]);
           }}
@@ -679,7 +712,8 @@ export default function Proveedores() {
                         )
                       );
                     } catch (err) {
-                      alert("Error al eliminar la relación");
+                      console.error(err);
+                      alert("Error al crear nuevas relaciones");
                     }
                   }}
                 >
@@ -747,7 +781,7 @@ export default function Proveedores() {
                             value={rel.precioUnitario ?? ""}
                             onChange={(e) =>
                               actualizarRelacion(
-                                index,
+                                mapIndex,
                                 "precioUnitario",
                                 parseFloat(e.target.value)
                               )
@@ -761,7 +795,7 @@ export default function Proveedores() {
                             value={rel.tiempoEntregaDias ?? ""}
                             onChange={(e) => {
                               const nuevas = [...nuevasRelaciones];
-                              nuevas[index].tiempoEntregaDias = parseInt(
+                              nuevas[mapIndex].tiempoEntregaDias = parseInt(
                                 e.target.value
                               );
                               setNuevasRelaciones(nuevas);
@@ -775,7 +809,7 @@ export default function Proveedores() {
                             value={rel.costoPedido ?? ""}
                             onChange={(e) => {
                               const nuevas = [...nuevasRelaciones];
-                              nuevas[index].costoPedido = parseFloat(
+                              nuevas[mapIndex].costoPedido = parseFloat(
                                 e.target.value
                               );
                               setNuevasRelaciones(nuevas);
@@ -794,7 +828,7 @@ export default function Proveedores() {
                 className="px-4 py-2 rounded-md bg-zinc-600 hover:bg-zinc-700"
                 onClick={() => {
                   setModalRelacionAbierto(false);
-                  setProveedorSeleccionado(null);
+                  setProveedorSeleccionado(proveedorVacio);
                   setNuevasRelaciones([]);
                 }}
               >
@@ -826,8 +860,9 @@ export default function Proveedores() {
 
                     alert("Relaciones creadas correctamente");
                     setModalRelacionAbierto(false);
-                    setProveedorSeleccionado(null);
+                    setProveedorSeleccionado(proveedorVacio);
                     setNuevasRelaciones([]);
+                    loadProveedores();
                   } catch (err) {
                     console.error("Error al crear nuevas relaciones:", err);
                     alert("Error al crear nuevas relaciones");

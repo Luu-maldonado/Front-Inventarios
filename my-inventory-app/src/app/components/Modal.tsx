@@ -2,12 +2,14 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 
 interface ModalProps {
+  open: boolean;
   title: string;
   children: React.ReactNode;
   onClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ title, children, onClose }) => {
+const Modal: React.FC<ModalProps> = ({ open, title, children, onClose }) => {
+  if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
       <div className="bg-zinc-900 rounded-xl p-6 max-w-[40rem] w-full max-h-[85vh] relative shadow-lg border border-zinc-700">
