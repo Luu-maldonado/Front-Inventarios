@@ -309,7 +309,7 @@ export default function Articulos() {
   const cargarArticulosAReponer = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/MaestroArticulos/articuloslista/reponer"
+        "http://localhost:5000/MaestroArticulos/articulosLista/reponer"
       );
       if (!res.ok) throw new Error("Error al obtener artículos a reponer");
       const data = await res.json();
