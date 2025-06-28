@@ -92,7 +92,7 @@ export default function Proveedores() {
   };
 
   const loadProveedores = () => {
-    fetch("http://localhost:5000/Proveedor/activos")
+    fetch("http://localhost:5000/Proveedor/activo")
       .then((res) => res.json())
       .then((data) => {
         console.log("Proveedores desde el back:", data);
