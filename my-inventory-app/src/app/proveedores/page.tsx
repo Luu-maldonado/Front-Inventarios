@@ -68,7 +68,7 @@ export default function Proveedores() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:5000/Proveedor/activos")
+    fetch("http://localhost:5000/Proveedor/activo")
       .then((res) => res.json())
       .then((data) => {
         console.log("Proveedores desde el back:", data);
@@ -654,7 +654,7 @@ export default function Proveedores() {
             )}
             {relacionesProveedor.map((rel, index) => (
               <div
-                key={`${rel.idArticulo}-${index}`}
+                key={`${ rel.idArticulo}-${index}`}
                 className="flex justify-between items-center mb-2 bg-zinc-800 p-2 rounded"
               >
                 <span>{rel.nombreArticulo}</span>
