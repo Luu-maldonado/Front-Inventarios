@@ -96,13 +96,13 @@ export default function Ventas() {
   };
 
   return (
-    <div className="text-white mt-12 mx-6">
+    <div className="text-white mt-12 mx-6 ">
       <h1 className="text-3xl font-bold mb-6">Simulación de Venta</h1>
 
       <div className="flex flex-col gap-4 max-w-md">
-        <label className="text-sm">Agregar artículo:</label>
+        <label className="text-sm">Seleccionar artículo:</label>
         <select
-          className="bg-zinc-800 border border-zinc-700 rounded-md px-4 py-2"
+          className="bg-zinc-800 border border-zinc-800 rounded-md px-1 py-3"
           onChange={(e) => {
             const id = parseInt(e.target.value);
             if (!isNaN(id)) agregarArticulo(id);
