@@ -10,7 +10,7 @@ interface Articulo {
 }
 
 interface ArticuloSeleccionado extends Articulo {
-  cantidad: number;
+  cantidadArticulo: number;
 }
 
 export default function Ventas() {
@@ -37,7 +37,7 @@ export default function Ventas() {
   const agregarArticulo = (id: number) => {
     const art = articulos.find((a) => a.idArticulo === id);
     if (art && !articuloSeleccionado.some((sel) => sel.idArticulo === id)) {
-      setArticuloSeleccionado([...articuloSeleccionado, { ...art, cantidad: 1 }]);
+      setArticuloSeleccionado([...articuloSeleccionado, { ...art, cantidadArticulo: 1 }]);
       setMensaje("");
     }
   };
@@ -46,7 +46,7 @@ export default function Ventas() {
     setArticuloSeleccionado((prev) =>
       prev.map((a) =>
         a.idArticulo === id
-          ? { ...a, cantidad: Math.min(Math.max(nuevaCantidad, 1), a.stockActual) }
+          ? { ...a, cantidadArticulo: Math.min(Math.max(nuevaCantidad, 1), a.stockActual) }
           : a
       )
     );
@@ -56,11 +56,6 @@ export default function Ventas() {
     setArticuloSeleccionado((prev) => prev.filter((a) => a.idArticulo !== id));
   };
 
-  const total = articuloSeleccionado.reduce(
-    (sum, a) => sum + a.costoAlmacen * a.cantidad,
-    0
-  );
-
   const confirmarVenta = async () => {
     if (articuloSeleccionado.length === 0) {
       setMensaje("❌ Debes seleccionar al menos un artículo.");
@@ -68,7 +63,7 @@ export default function Ventas() {
     }
 
     const sinStock = articuloSeleccionado.find(
-      (a) => a.cantidad > a.stockActual
+      (a) => a.cantidadArticulo > a.stockActual
     );
     if (sinStock) {
       setMensaje(`❌ No hay suficiente stock para ${sinStock.nombreArticulo}`);
@@ -77,15 +72,14 @@ export default function Ventas() {
 
     const ventaPayload = {
       descripcionVenta: "Venta simulada desde frontend",
-      totalVenta: total,
       detalles: articuloSeleccionado.map((a) => ({
         idArticulo: a.idArticulo,
-        cantidadVendida: a.cantidad,
+        cantidadArticulo: a.cantidadArticulo,
       })),
     };
 
     try {
-      const res = await fetch("http://localhost:5000/Ventas/crear-venta", {
+      const res = await fetch("http://localhost:5000/api/Ventas/crear-venta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ventaPayload),
@@ -119,7 +113,7 @@ export default function Ventas() {
             .filter((a) => !articuloSeleccionado.some((sel) => sel.idArticulo === a.idArticulo))
             .map((a) => (
               <option key={a.idArticulo} value={a.idArticulo}>
-                {a.nombreArticulo} (Stock: {a.stockActual}, Precio: ${a.costoAlmacen})
+                {a.nombreArticulo} (Stock: {a.stockActual})
               </option>
             ))}
         </select>
@@ -141,15 +135,15 @@ export default function Ventas() {
               type="number"
               min={1}
               max={a.stockActual}
-              value={a.cantidad ?? 1}
-              onChange={(e) => actualizarCantidad(a.idArticulo, parseInt(e.target.value))}
+              value={a.cantidadArticulo ?? 1}
+              onChange={(e) => {
+    const nuevaCantidad = parseInt(e.target.value);
+    actualizarCantidad(a.idArticulo, isNaN(nuevaCantidad) ? 1 : nuevaCantidad);
+  }}
               className="bg-zinc-700 border border-zinc-600 rounded-md px-3 py-1 w-full"
             />
-            <p>Total parcial: ${(a.costoAlmacen * a.cantidad).toFixed(2)}</p>
           </div>
         ))}
-
-        <p className="text-lg mt-4">💰 Total de la venta: <strong>${total.toFixed(2)}</strong></p>
 
         <button
           onClick={confirmarVenta}

@@ -102,7 +102,7 @@ export default function Ordenes() {
     setModalAbierto(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/OrdenCompra/detalles-orden/${orden.nOrdenCompra}/detalles`);
+      const response = await fetch(`http://localhost:5000/OrdenCompra/detalles-orden/${orden.nOrdenCompra}`);
       const data = await response.json();
       setDetalles(data);
     } catch (error) {
@@ -311,6 +311,7 @@ export default function Ordenes() {
                   cargarArticulosDeProveedor(nuevoProveedor);
                 }}
               >
+                <option value="">Seleccionar proveedor</option>
                 {proveedores.map((prov) => (
                   <option key={prov.idProveedor} value={prov.idProveedor}>
                     {prov.nombreProveedor}
@@ -433,7 +434,7 @@ export default function Ordenes() {
                 </button>
               )}
 
-              {ocSeleccionada.estado === "En proceso" && (
+              {ocSeleccionada.estado === "En Proceso" && (
                 <button
                   className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700"
                   onClick={async () => {
@@ -452,6 +453,7 @@ export default function Ordenes() {
           </div>
         </Modal>
       )}
+
       {/* Modal agregar orden */}
       {modalTipo === "nueva" && (
         <Modal open={modalAbierto} onClose={cerrarModal}>
