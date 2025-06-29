@@ -25,11 +25,13 @@ interface Proveedor {
 }
 
 interface DetalleOrden {
-  nDetalleOrdenCompra: number;
-  cantidadArticulos: number;
-  precioSubTotal: number;
+  precioUnitario: number;
+  cantidad: number;
+  subTotal: number;
   idArticulo: number;
   nombreArticulo: string;
+  seleccionado: boolean;
+  qOptimo: number;
 }
 
 export default function Ordenes() {
@@ -48,19 +50,21 @@ export default function Ordenes() {
     "detalle" | "edicion" | "nueva" | null
   >(null);
 
- const cargarOrdenes = async () => {
-  try {
-    const res = await fetch("http://localhost:5000/OrdenCompra/lista-ordenes");
-    const data = await res.json();
-    setOrdenes(data);
-  } catch (err) {
-    console.error("Error cargando órdenes:", err);
-    setOrdenes([]);
-  }
-};
+  const cargarOrdenes = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/OrdenCompra/lista-ordenes"
+      );
+      const data = await res.json();
+      setOrdenes(data);
+    } catch (err) {
+      console.error("Error cargando órdenes:", err);
+      setOrdenes([]);
+    }
+  };
 
-useEffect(() => {
-  cargarOrdenes();
+  useEffect(() => {
+    cargarOrdenes();
 
     fetch("http://localhost:5000/OrdenCompraEstado")
       .then((res) => res.json())
@@ -136,11 +140,13 @@ useEffect(() => {
       }
 
       const articulosFormateados = data.map((a: DetalleOrden) => ({
-        nDetalleOrdenCompra: a.nDetalleOrdenCompra,
         idArticulo: a.idArticulo,
         nombreArticulo: a.nombreArticulo,
-        cantidadArticulos: a.cantidadArticulos,
-        precioSubTotal: a.precioSubTotal ?? 0,
+        cantidad: a.cantidad ?? 1,
+        precioUnitario: a.precioUnitario,
+        subTotal: a.subTotal ?? 0,
+        qOptimo: a.qOptimo != null ? Number(a.qOptimo) : 0,
+        seleccionado: false,
       }));
 
       setDetalles(articulosFormateados);
@@ -286,20 +292,23 @@ useEffect(() => {
               <ul className="space-y-2">
                 {detalles.map((det) => (
                   <li
-                    key={det.nDetalleOrdenCompra}
+                    key={det.idArticulo}
                     className="border-b border-zinc-600 pb-2"
                   >
                     <p>
-                      <strong>ID:</strong> {det.idArticulo}
+                      <strong>ID Articulo:</strong> {det.idArticulo}
                     </p>
                     <p>
                       <strong>Artículo:</strong> {det.nombreArticulo}
                     </p>
                     <p>
-                      <strong>Cantidad:</strong> {det.cantidadArticulos}
+                      <strong>Cantidad:</strong> {det.cantidad}
                     </p>
                     <p>
-                      <strong>Subtotal:</strong> ${det.precioSubTotal}
+                      <strong>Precio unitario:</strong> ${det.precioUnitario}
+                    </p>
+                    <p>
+                      <strong>Subtotal:</strong> ${det.subTotal}
                     </p>
                   </li>
                 ))}
@@ -309,7 +318,7 @@ useEffect(() => {
         </Modal>
       )}
 
-      {/*Modal detalles*/}
+      {/*Modal edicion*/}
 
       {modalTipo === "edicion" && ocSeleccionada && (
         <Modal open={modalAbierto} title="Modal detalles" onClose={cerrarModal}>
@@ -361,18 +370,32 @@ useEffect(() => {
                       ID: {art.idArticulo}
                     </p>
                   </div>
-                  <input
-                    type="number"
-                    min={1}
-                    className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
-                    value={art.cantidadArticulos}
-                    onChange={(e) => {
-                      const nuevaCantidad = parseInt(e.target.value);
-                      const copia = [...detalles];
-                      copia[idx].cantidadArticulos = nuevaCantidad;
-                      setDetalles(copia);
-                    }}
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={art.seleccionado}
+                      onChange={() => {
+                        const copia = [...detalles];
+                        copia[idx].seleccionado = !copia[idx].seleccionado;
+                        setDetalles(copia);
+                      }}
+                    />
+                    <input
+                      type="number"
+                      min={1}
+                      className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
+                      value={art.cantidad ?? 0}
+                      onChange={(e) => {
+                        const nuevaCantidad = Math.max(
+                          1,
+                          Number(e.target.value) || 1
+                        );
+                        const copia = [...detalles];
+                        copia[idx].cantidad = nuevaCantidad;
+                        setDetalles(copia);
+                      }}
+                    />
+                  </div>
                 </li>
               ))}
             </ul>
@@ -393,7 +416,7 @@ useEffect(() => {
                     idProveedor: ocSeleccionada.idProveedor,
                     articulos: detalles.map((d) => ({
                       idArticulo: d.idArticulo,
-                      cantidad: d.cantidadArticulos,
+                      cantidad: d.cantidad,
                     })),
                   };
 
@@ -499,7 +522,7 @@ useEffect(() => {
       {modalTipo === "nueva" && (
         <Modal
           open={modalAbierto}
-          title="Modal agregar orden"
+          title="Crear orden"
           onClose={cerrarModal}
         >
           <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
@@ -509,8 +532,6 @@ useEffect(() => {
             >
               &times;
             </button>
-
-            <h2 className="text-xl font-bold mb-4">Crear Nueva Orden</h2>
 
             <div className="mb-4">
               <label className="block text-sm mb-1">Proveedor:</label>
@@ -554,18 +575,20 @@ useEffect(() => {
                           ID: {art.idArticulo}
                         </p>
                       </div>
-                      <input
-                        type="number"
-                        min={1}
-                        className="w-20 px-2 py-1 bg-zinc-800 rounded-md text-white text-center"
-                        value={art.cantidadArticulos}
-                        onChange={(e) => {
-                          const nuevaCantidad = parseInt(e.target.value);
-                          const copia = [...detalles];
-                          copia[idx].cantidadArticulos = nuevaCantidad;
-                          setDetalles(copia);
-                        }}
-                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={art.seleccionado}
+                          onChange={() => {
+                            const copia = [...detalles];
+                            copia[idx].seleccionado = !copia[idx].seleccionado;
+                            setDetalles(copia);
+                          }}
+                        />
+                        <span className="ml-2">
+                          Cantidad óptima: {art.qOptimo}
+                        </span>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -586,10 +609,12 @@ useEffect(() => {
                   try {
                     const body = {
                       idProveedor: ocSeleccionada?.idProveedor,
-                      articulos: detalles.map((d) => ({
-                        idArticulo: d.idArticulo,
-                        cantidad: d.cantidadArticulos,
-                      })),
+                      articulos: detalles
+                        .filter((d) => d.seleccionado && d.cantidad > 0) // ✅ Solo los seleccionados
+                        .map((d) => ({
+                          idArticulo: d.idArticulo,
+                          cantidad: d.cantidad,
+                        })),
                     };
 
                     const res = await fetch(
