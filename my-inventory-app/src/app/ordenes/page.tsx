@@ -32,7 +32,6 @@ interface DetalleOrden {
   nombreArticulo: string;
 }
 
-
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState<OrdenDeCompra[]>([]);
   const [estados, setEstados] = useState<EstadoOrden[]>([]);
@@ -40,21 +39,28 @@ export default function Ordenes() {
   const [filtro, setFiltro] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [proveedorFiltro, setProveedorFiltro] = useState("");
-  const [ocSeleccionada, setOCSeleccionada] = useState<OrdenDeCompra | null>(null);
+  const [ocSeleccionada, setOCSeleccionada] = useState<OrdenDeCompra | null>(
+    null
+  );
   const [modalAbierto, setModalAbierto] = useState(false);
   const [detalles, setDetalles] = useState<DetalleOrden[]>([]);
-  const [modalTipo, setModalTipo] = useState<"detalle" | "edicion" | null>(null);
+  const [modalTipo, setModalTipo] = useState<
+    "detalle" | "edicion" | "nueva" | null
+  >(null);
 
-  useEffect(() => {
-    fetch("http://localhost:5000/OrdenCompra/lista-ordenes")
-      .then((res) => res.json())
-      .then((data) => {
-        setOrdenes(data);
-      })
-      .catch((err) => {
-        console.error("Error al cargar órdenes desde backend:", err);
-        setOrdenes([]);
-      });
+ const cargarOrdenes = async () => {
+  try {
+    const res = await fetch("http://localhost:5000/OrdenCompra/lista-ordenes");
+    const data = await res.json();
+    setOrdenes(data);
+  } catch (err) {
+    console.error("Error cargando órdenes:", err);
+    setOrdenes([]);
+  }
+};
+
+useEffect(() => {
+  cargarOrdenes();
 
     fetch("http://localhost:5000/OrdenCompraEstado")
       .then((res) => res.json())
@@ -64,7 +70,7 @@ export default function Ordenes() {
         setEstados([]);
       });
 
-    fetch("http://localhost:5000/Proveedor/activos")
+    fetch("http://localhost:5000/Proveedor/activo")
       .then((res) => res.json())
       .then((data) => setProveedores(data))
       .catch((err) => {
@@ -87,27 +93,31 @@ export default function Ordenes() {
     .filter(
       (oc) =>
         !proveedorFiltro ||
-        oc.proveedor?.trim().toLowerCase() === proveedorFiltro.trim().toLowerCase()
+        oc.proveedor?.trim().toLowerCase() ===
+          proveedorFiltro.trim().toLowerCase()
     );
 
   const cerrarModal = () => {
     setModalAbierto(false);
     setOCSeleccionada(null);
-    setDetalles(null);
+    setDetalles([]);
     setModalTipo(null);
   };
-  const abrirModalDetalle = async (orden: any) => {
+  const abrirModalDetalle = async (orden: OrdenDeCompra) => {
     setOCSeleccionada(orden);
     setModalTipo("detalle");
     setModalAbierto(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/OrdenCompra/detalles-orden/${orden.nOrdenCompra}`);
+      const response = await fetch(
+        `http://localhost:5000/OrdenCompra/detalles-orden/${orden.nOrdenCompra}`
+      );
       const data = await response.json();
       setDetalles(data);
     } catch (error) {
       console.error("Error al obtener detalles:", error);
       setDetalles([]);
+      cargarOrdenes();
     }
   };
 
@@ -121,13 +131,15 @@ export default function Ordenes() {
       if (!Array.isArray(data)) {
         console.error("El backend no devolvió un array:", data);
         setDetalles([]);
+        cargarOrdenes();
         return;
       }
 
-      const articulosFormateados = data.map((a: any) => ({
+      const articulosFormateados = data.map((a: DetalleOrden) => ({
+        nDetalleOrdenCompra: a.nDetalleOrdenCompra,
         idArticulo: a.idArticulo,
         nombreArticulo: a.nombreArticulo,
-        cantidadArticulos: 1,
+        cantidadArticulos: a.cantidadArticulos,
         precioSubTotal: a.precioSubTotal ?? 0,
       }));
 
@@ -137,7 +149,6 @@ export default function Ordenes() {
       setDetalles([]);
     }
   };
-
 
   return (
     <div className="text-white mt-12 mx-6">
@@ -157,7 +168,10 @@ export default function Ordenes() {
         >
           <option value="">Todos los estados</option>
           {estados.map((estado) => (
-            <option key={estado.idOrdenCompraEstado} value={estado.nombreEstadoOrden}>
+            <option
+              key={estado.idOrdenCompraEstado}
+              value={estado.nombreEstadoOrden}
+            >
               {estado.nombreEstadoOrden}
             </option>
           ))}
@@ -191,19 +205,33 @@ export default function Ordenes() {
         <table className="min-w-full divide-y divide-zinc-700">
           <thead className="bg-zinc-900">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Fecha</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Proveedor</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Total</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Estado</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Acciones</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                ID
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                Fecha
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                Proveedor
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                Total
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                Estado
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-700 bg-zinc-800">
             {ordenesFiltradas.map((oc) => (
               <tr key={oc.nOrdenCompra}>
                 <td className="px-4 py-3 text-zinc-200">#{oc.nOrdenCompra}</td>
-                <td className="px-4 py-3 text-zinc-200">{new Date(oc.fechaOrden).toLocaleString()}</td>
+                <td className="px-4 py-3 text-zinc-200">
+                  {new Date(oc.fechaOrden).toLocaleString()}
+                </td>
                 <td className="px-4 py-3 text-zinc-200">{oc.proveedor}</td>
                 <td className="px-4 py-3 text-zinc-200">${oc.totalPagar}</td>
                 <td className="px-4 py-3 text-zinc-200">{oc.estado}</td>
@@ -239,7 +267,7 @@ export default function Ordenes() {
       {/*Modal detalles*/}
 
       {modalTipo === "detalle" && (
-        <Modal open={modalAbierto} onClose={cerrarModal}>
+        <Modal open={modalAbierto} title="Modal detalles" onClose={cerrarModal}>
           <div className="relative text-white p-4 bg-zinc-800 rounded-md max-w-lg mx-auto mt-10">
             <button
               onClick={cerrarModal}
@@ -284,7 +312,7 @@ export default function Ordenes() {
       {/*Modal detalles*/}
 
       {modalTipo === "edicion" && ocSeleccionada && (
-        <Modal open={modalAbierto} onClose={cerrarModal}>
+        <Modal open={modalAbierto} title="Modal detalles" onClose={cerrarModal}>
           <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
             <button
               onClick={cerrarModal}
@@ -329,7 +357,9 @@ export default function Ordenes() {
                 >
                   <div>
                     <p className="font-medium">{art.nombreArticulo}</p>
-                    <p className="text-sm text-zinc-300">ID: {art.idArticulo}</p>
+                    <p className="text-sm text-zinc-300">
+                      ID: {art.idArticulo}
+                    </p>
                   </div>
                   <input
                     type="number"
@@ -346,8 +376,7 @@ export default function Ordenes() {
                 </li>
               ))}
             </ul>
-            <div className="mt-6">
-            </div>
+            <div className="mt-6"></div>
             <div className="flex justify-end mt-6 gap-4">
               <button
                 className="px-4 py-2 rounded-md bg-gray-500 hover:bg-gray-600"
@@ -369,17 +398,25 @@ export default function Ordenes() {
                   };
 
                   try {
-                    const res = await fetch(`http://localhost:5000/OrdenCompra/modificar-orden`, {
-                      method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(body),
-                    });
+                    const res = await fetch(
+                      `http://localhost:5000/OrdenCompra/modificar-orden`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                      }
+                    );
 
                     if (!res.ok) throw new Error("Error al modificar la orden");
                     alert("Orden modificada correctamente.");
                     cerrarModal();
+                    cargarOrdenes();
                   } catch (error) {
-                    alert("Error: " + error.message);
+                    if (error instanceof Error) {
+                      alert("Error: " + error.message);
+                    } else {
+                      alert("Error inesperado");
+                    }
                   }
                 }}
               >
@@ -397,6 +434,7 @@ export default function Ordenes() {
                       );
                       alert("Orden confirmada.");
                       cerrarModal();
+                      cargarOrdenes();
                     }}
                   >
                     Confirmar
@@ -411,6 +449,7 @@ export default function Ordenes() {
                       );
                       alert("Orden cancelada.");
                       cerrarModal();
+                      cargarOrdenes();
                     }}
                   >
                     Cancelar OC
@@ -428,6 +467,7 @@ export default function Ordenes() {
                     );
                     alert("Estado cambiado a 'En proceso'");
                     cerrarModal();
+                    cargarOrdenes();
                   }}
                 >
                   Marcar En Proceso
@@ -444,6 +484,7 @@ export default function Ordenes() {
                     );
                     alert("Entrada registrada");
                     cerrarModal();
+                    cargarOrdenes();
                   }}
                 >
                   Registrar Entrada
@@ -456,7 +497,11 @@ export default function Ordenes() {
 
       {/* Modal agregar orden */}
       {modalTipo === "nueva" && (
-        <Modal open={modalAbierto} onClose={cerrarModal}>
+        <Modal
+          open={modalAbierto}
+          title="Modal agregar orden"
+          onClose={cerrarModal}
+        >
           <div className="relative text-white p-6 bg-zinc-800 rounded-md max-w-3xl mx-auto mt-10">
             <button
               onClick={cerrarModal}
@@ -473,7 +518,15 @@ export default function Ordenes() {
                 className="w-full px-4 py-2 rounded-md bg-zinc-700"
                 onChange={async (e) => {
                   const idProv = parseInt(e.target.value);
-                  setOCSeleccionada({ nOrdenCompra: 0, fechaOrden: "", totalPagar: 0, proveedor: "", idProveedor: idProv, loteSugerido: 0, estado: "Pendiente" });
+                  setOCSeleccionada({
+                    nOrdenCompra: 0,
+                    fechaOrden: "",
+                    totalPagar: 0,
+                    proveedor: "",
+                    idProveedor: idProv,
+                    loteSugerido: 0,
+                    estado: "Pendiente",
+                  });
                   await cargarArticulosDeProveedor(idProv);
                 }}
               >
@@ -497,7 +550,9 @@ export default function Ordenes() {
                     >
                       <div>
                         <p className="font-medium">{art.nombreArticulo}</p>
-                        <p className="text-sm text-zinc-300">ID: {art.idArticulo}</p>
+                        <p className="text-sm text-zinc-300">
+                          ID: {art.idArticulo}
+                        </p>
                       </div>
                       <input
                         type="number"
@@ -537,17 +592,25 @@ export default function Ordenes() {
                       })),
                     };
 
-                    const res = await fetch("http://localhost:5000/OrdenCompra/generar-orden", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(body),
-                    });
+                    const res = await fetch(
+                      "http://localhost:5000/OrdenCompra/generar-orden",
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                      }
+                    );
 
                     if (!res.ok) throw new Error("No se pudo crear la orden.");
                     alert("Orden creada correctamente");
                     cerrarModal();
+                    cargarOrdenes();
                   } catch (err) {
-                    alert("Error al crear orden: " + err.message);
+                    if (err instanceof Error) {
+                      alert("Error: " + err.message);
+                    } else {
+                      alert("Error inesperado");
+                    }
                   }
                 }}
               >
