@@ -22,8 +22,8 @@ export default function Ventas() {
     fetch("http://localhost:5000/MaestroArticulos/articulos/list-art-datos")
       .then((res) => res.json())
       .then((data) => {
-        const activos = data.filter((a: any) => a.stockActual > 0); 
-        const transformados = activos.map((a: any) => ({
+        const activos = data.filter((a: Articulo) => a.stockActual > 0); 
+        const transformados = activos.map((a: Articulo) => ({
           idArticulo: a.idArticulo,
           nombreArticulo: a.nombreArticulo,
           costoCompra: a.costoAlmacen, 
@@ -90,9 +90,13 @@ export default function Ventas() {
       const data = await res.json();
       setMensaje(`✅ Venta registrada correctamente. N° Venta: ${data.venta.nVenta}`);
       setArticuloSeleccionado([]);
-    } catch (error: any) {
-      setMensaje("❌ Error al registrar la venta: " + error.message);
-    }
+    }  catch (error: unknown) {
+  if (error instanceof Error) {
+    setMensaje("❌ Error al registrar la venta: " + error.message);
+  } else {
+    setMensaje("❌ Error inesperado");
+  }
+}
   };
 
   return (
