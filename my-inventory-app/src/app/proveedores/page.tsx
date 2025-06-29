@@ -701,7 +701,7 @@ export default function Proveedores() {
                       await fetch(
                         `http://localhost:5000/api/ProveedorArticulo/baja-prov-art`,
                         {
-                          method: "POST",
+                          method: "Delete",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
                             idProveedor: proveedorSeleccionado.idProveedor,
@@ -714,6 +714,7 @@ export default function Proveedores() {
                           (r) => r.idArticulo !== rel.idArticulo
                         )
                       );
+                      loadProveedores();
                     } catch (err) {
                       console.error(err);
                       alert("Error al crear nuevas relaciones");
