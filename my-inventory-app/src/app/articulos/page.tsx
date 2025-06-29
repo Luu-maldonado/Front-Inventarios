@@ -21,6 +21,7 @@ interface Articulo {
   tiempoRevision: number;
   stockActual?: number;
   stockSeguridad?: number;
+  stockMaximo?:number;
   puntoPedido?: string;
   cgi?: string;
   costoAlmacen: number;
@@ -214,6 +215,7 @@ export default function Articulos() {
         tiempoRevision: item.tiempoRevision,
         stockActual: Number(item.stockActual),
         stockSeguridad: Number(item.stockSeguridad),
+        stockMaximo: Number(item.stockMaximo),
         puntoPedido: item.puntoPedido,
         cgi: item.cgi,
         costoAlmacen: Number(item.costoAlmacen),
@@ -405,6 +407,7 @@ export default function Articulos() {
               <th className="px-2 py-1 border">Modelo Inventario</th>
               <th className="px-2 py-1 border">Stock Actual</th>
               <th className="px-2 py-1 border">Stock Seguridad</th>
+              <th className="px-2 py-1 border">Stock Maximo</th>
               <th className="px-2 py-1 border">Punto Pedido</th>
               <th className="px-2 py-1 border">CGI</th>
               <th className="px-2 py-1 border">Demanda Diaria</th>
@@ -435,6 +438,7 @@ export default function Articulos() {
                   <td className="px-2 py-1 border">{art.modeloInv}</td>
                   <td className="px-2 py-1 border">{art.stockActual}</td>
                   <td className="px-2 py-1 border">{art.stockSeguridad}</td>
+                  <td className="px-2 py-1 border">{art.stockMaximo}</td>
                   <td className="px-2 py-1 border">{art.puntoPedido}</td>
                   <td className="px-2 py-1 border">{art.cgi}</td>
                   <td className="px-2 py-1 border">{art.demandaDiaria}</td>
