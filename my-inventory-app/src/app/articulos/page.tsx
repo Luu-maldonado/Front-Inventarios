@@ -26,6 +26,7 @@ interface Articulo {
   costoAlmacen: number;
   costoPedido?: number;
   costoCompra?: number;
+  qOptimo?:number;
   stock?: {
     stockActual: number;
     stockSeguridad: number;
@@ -216,6 +217,7 @@ export default function Articulos() {
         puntoPedido: item.puntoPedido,
         cgi: item.cgi,
         costoAlmacen: Number(item.costoAlmacen),
+        qOptimo:Number(item.qOptimo),
       }));
       setArticulos(articulosTransformados);
     } catch (error) {
@@ -408,6 +410,7 @@ export default function Articulos() {
               <th className="px-2 py-1 border">Demanda Diaria</th>
               <th className="px-2 py-1 border">Tiempo Revisión</th>
               <th className="px-2 py-1 border">Costo Almacenaje</th>
+              <th className="px-2 py-1 border">Q óptimo</th>
             </tr>
           </thead>
           <tbody>
@@ -437,9 +440,12 @@ export default function Articulos() {
                   <td className="px-2 py-1 border">{art.demandaDiaria}</td>
                   <td className="px-2 py-1 border">{art.tiempoRevision}</td>
                   <td className="px-2 py-1 border">${art.costoAlmacen}</td>
+                  <td className="px-2 py-1 border">{art.qOptimo}</td>
                   <td className="px-3 py-2 border border-gray-700 text-center">
                     <button
-                      onClick={() => setModalEditar(art)}
+                      onClick={() => {
+                        console.log("click en editar",art);
+                        setModalEditar(art)}}
                       className="mr-2 hover:text-yellow-300"
                     >
                       <FaEdit />
@@ -614,7 +620,7 @@ export default function Articulos() {
 
       {/* Modal Edición */}
       {modalEditar && (
-        <Modal title="Editar Artículo" open={modalReposicionAbierto} onClose={() => setModalEditar(null)}>
+        <Modal title="Editar Artículo" open={modalEditar !== null} onClose={() => setModalEditar(null)}>
           <div className="max-h-[80vh] overflow-y-auto p-4">
             <form
               onSubmit={(e) => {
@@ -665,7 +671,7 @@ export default function Articulos() {
               <label className="text-white block mb-1">
                 Categoria articulo
               </label>
-              <p>Categoria seleccionada antes: {categoriaSeleccionada}</p>
+              <p>Categoria actual: {categoriaSeleccionada}</p>
               <select
                 name="idCategoriaArticulo"
                 className="w-full px-2 py-1 rounded bg-gray-700 text-white"
@@ -680,7 +686,7 @@ export default function Articulos() {
                   </option>
                 ))}
               </select>
-              <p>Modelo seleccionado antes: {modeloSeleccionado}</p>
+              <p>Modelo actual: {modeloSeleccionado}</p>
               <label className="text-white block mb-1">Modelo inventario</label>
               <select
                 name="modeloInv"

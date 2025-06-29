@@ -26,6 +26,7 @@ interface RelacionArticulo {
   precioUnitario: number;
   tiempoEntregaDias: number;
   costoPedido: number;
+  predeterminado: boolean;
 }
 
 interface ProveedorBackend {
@@ -395,6 +396,7 @@ export default function Proveedores() {
                                   precioUnitario: 0,
                                   tiempoEntregaDias: 0,
                                   costoPedido: 0,
+                                  predeterminado: true,
                                 },
                               ]);
                             }
@@ -677,10 +679,6 @@ export default function Proveedores() {
           }}
         >
           <div className="text-white p-4 max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              Editar relación proveedor-artículos
-            </h2>
-
             {/* ARTÍCULOS YA RELACIONADOS */}
             <h3 className="font-semibold mb-2">Artículos relacionados:</h3>
             {relacionesProveedor.length === 0 && (
@@ -697,6 +695,12 @@ export default function Proveedores() {
                 <button
                   className="text-red-500 hover:text-red-300"
                   onClick={async () => {
+                     if (rel.predeterminado) {
+      alert(
+        "No se puede eliminar esta relación porque este proveedor es el predeterminado para este artículo."
+      );
+      return; // 🚫 Salir sin ejecutar nada
+    }
                     try {
                       await fetch(
                         `http://localhost:5000/api/ProveedorArticulo/baja-prov-art`,
