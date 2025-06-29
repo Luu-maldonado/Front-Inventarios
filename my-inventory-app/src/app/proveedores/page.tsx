@@ -26,6 +26,7 @@ interface RelacionArticulo {
   precioUnitario: number;
   tiempoEntregaDias: number;
   costoPedido: number;
+  predeterminado: boolean;
 }
 
 interface ProveedorBackend {
@@ -111,9 +112,8 @@ export default function Proveedores() {
   };
 
   useEffect(() => {
-  loadProveedores();
+    loadProveedores();
   }, []);
-
 
   const proveedoresFiltrados = proveedores.filter(
     (p) =>
@@ -212,7 +212,9 @@ export default function Proveedores() {
                       loadProveedores();
                     } catch (err) {
                       console.error("Error al eliminar proveedor:", err);
-                      alert("Ocurrió un error al eliminar el proveedor");
+                      alert(
+                        "No se pueden eliminar proveedores predeterminados"
+                      );
                     }
                   }}
                   className="text-red-500 hover:text-red-400"
@@ -395,6 +397,7 @@ export default function Proveedores() {
                                   precioUnitario: 0,
                                   tiempoEntregaDias: 0,
                                   costoPedido: 0,
+                                  predeterminado: true,
                                 },
                               ]);
                             }
@@ -412,6 +415,8 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Precio unitario"
                             value={rel.precioUnitario ?? 0}
+                            min={1}
+                            max={1000}
                             onChange={(e) => {
                               const nuevoValor = parseFloat(e.target.value);
                               setRelacionesProveedor((prev) => {
@@ -430,6 +435,8 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Tiempo entrega (días)"
                             value={rel.tiempoEntregaDias}
+                            min={1}
+                            max={1000}
                             onChange={(e) => {
                               const nuevas = [...relacionesProveedor];
                               nuevas[index].tiempoEntregaDias = parseInt(
@@ -444,6 +451,8 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Costo de pedido"
                             value={rel.costoPedido}
+                            min={1}
+                            max={1000}
                             onChange={(e) => {
                               const nuevas = [...relacionesProveedor];
                               nuevas[index].costoPedido = parseFloat(
@@ -674,10 +683,6 @@ export default function Proveedores() {
           }}
         >
           <div className="text-white p-4 max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              Editar relación proveedor-artículos
-            </h2>
-
             {/* ARTÍCULOS YA RELACIONADOS */}
             <h3 className="font-semibold mb-2">Artículos relacionados:</h3>
             {relacionesProveedor.length === 0 && (
@@ -694,11 +699,17 @@ export default function Proveedores() {
                 <button
                   className="text-red-500 hover:text-red-300"
                   onClick={async () => {
+                    if (rel.predeterminado) {
+                      alert(
+                        "No se puede eliminar esta relación porque este proveedor es el predeterminado para este artículo."
+                      );
+                      return; // 🚫 Salir sin ejecutar nada
+                    }
                     try {
                       await fetch(
                         `http://localhost:5000/api/ProveedorArticulo/baja-prov-art`,
                         {
-                          method: "POST",
+                          method: "Delete",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({
                             idProveedor: proveedorSeleccionado.idProveedor,
@@ -711,6 +722,7 @@ export default function Proveedores() {
                           (r) => r.idArticulo !== rel.idArticulo
                         )
                       );
+                      loadProveedores();
                     } catch (err) {
                       console.error(err);
                       alert("Error al crear nuevas relaciones");
@@ -738,7 +750,8 @@ export default function Proveedores() {
                   const relIndex = nuevasRelaciones.findIndex(
                     (r) => r.idArticulo === art.idArticulo
                   );
-                  const rel = nuevasRelaciones[relIndex];
+                  const rel =
+                    relIndex !== -1 ? nuevasRelaciones[relIndex] : undefined;
 
                   return (
                     <div
@@ -758,14 +771,16 @@ export default function Proveedores() {
                                 )
                               );
                             } else {
-                              nuevas.push({
-                                idArticulo: art.idArticulo,
-                                nombreArticulo: art.nombreArticulo,
-                                precioUnitario: 0,
-                                tiempoEntregaDias: 0,
-                                costoPedido: 0,
-                              });
-                              setNuevasRelaciones(nuevas);
+                              setNuevasRelaciones([
+                                ...nuevasRelaciones,
+                                {
+                                  idArticulo: art.idArticulo,
+                                  nombreArticulo: art.nombreArticulo,
+                                  precioUnitario: 0,
+                                  tiempoEntregaDias: 0,
+                                  costoPedido: 0,
+                                },
+                              ]);
                             }
                           }}
                         />
@@ -779,26 +794,34 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Precio unitario"
                             value={rel.precioUnitario ?? ""}
-                            onChange={(e) =>
-                              actualizarRelacion(
-                                mapIndex,
-                                "precioUnitario",
-                                parseFloat(e.target.value)
-                              )
-                            }
+                            min={1}
+                            max={1000}
+                            onChange={(e) => {
+                              if (relIndex !== -1) {
+                                actualizarRelacion(
+                                  relIndex,
+                                  "precioUnitario",
+                                  parseFloat(e.target.value)
+                                );
+                              }
+                            }}
                             className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
                           />
                           <p>Tiempo Entrega</p>
                           <input
                             type="number"
                             placeholder="Tiempo entrega (días)"
+                            min={1}
+                            max={1000}
                             value={rel.tiempoEntregaDias ?? ""}
                             onChange={(e) => {
-                              const nuevas = [...nuevasRelaciones];
-                              nuevas[mapIndex].tiempoEntregaDias = parseInt(
-                                e.target.value
-                              );
-                              setNuevasRelaciones(nuevas);
+                              if (relIndex !== -1) {
+                                actualizarRelacion(
+                                  relIndex,
+                                  "tiempoEntregaDias",
+                                  parseInt(e.target.value)
+                                );
+                              }
                             }}
                             className="w-full mb-1 px-3 py-1 rounded bg-zinc-800"
                           />
@@ -807,12 +830,16 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Costo de pedido"
                             value={rel.costoPedido ?? ""}
+                            min={1}
+                            max={1000}
                             onChange={(e) => {
-                              const nuevas = [...nuevasRelaciones];
-                              nuevas[mapIndex].costoPedido = parseFloat(
-                                e.target.value
-                              );
-                              setNuevasRelaciones(nuevas);
+                              if (relIndex !== -1) {
+                                actualizarRelacion(
+                                  relIndex,
+                                  "costoPedido",
+                                  parseFloat(e.target.value)
+                                );
+                              }
                             }}
                             className="w-full px-3 py-1 rounded bg-zinc-800"
                           />

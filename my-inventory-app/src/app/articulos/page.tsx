@@ -21,11 +21,13 @@ interface Articulo {
   tiempoRevision: number;
   stockActual?: number;
   stockSeguridad?: number;
+  stockMaximo?:number;
   puntoPedido?: string;
   cgi?: string;
   costoAlmacen: number;
   costoPedido?: number;
   costoCompra?: number;
+  qOptimo?:number;
   stock?: {
     stockActual: number;
     stockSeguridad: number;
@@ -213,9 +215,11 @@ export default function Articulos() {
         tiempoRevision: item.tiempoRevision,
         stockActual: Number(item.stockActual),
         stockSeguridad: Number(item.stockSeguridad),
+        stockMaximo: Number(item.stockMaximo),
         puntoPedido: item.puntoPedido,
         cgi: item.cgi,
         costoAlmacen: Number(item.costoAlmacen),
+        qOptimo:Number(item.qOptimo),
       }));
       setArticulos(articulosTransformados);
     } catch (error) {
@@ -241,7 +245,7 @@ export default function Articulos() {
       obtenerArticulos();
     } catch (error) {
       console.error("Error eliminando el artículo:", error);
-      alert("Ocurrió un error al intentar eliminar el artículo.");
+      alert("No se puede eliminar si tiene ordenes Pendientes o Enviadas");
     }
   };
 
@@ -403,11 +407,13 @@ export default function Articulos() {
               <th className="px-2 py-1 border">Modelo Inventario</th>
               <th className="px-2 py-1 border">Stock Actual</th>
               <th className="px-2 py-1 border">Stock Seguridad</th>
+              <th className="px-2 py-1 border">Stock Maximo</th>
               <th className="px-2 py-1 border">Punto Pedido</th>
               <th className="px-2 py-1 border">CGI</th>
               <th className="px-2 py-1 border">Demanda Diaria</th>
               <th className="px-2 py-1 border">Tiempo Revisión</th>
               <th className="px-2 py-1 border">Costo Almacenaje</th>
+              <th className="px-2 py-1 border">Q óptimo</th>
             </tr>
           </thead>
           <tbody>
@@ -432,14 +438,18 @@ export default function Articulos() {
                   <td className="px-2 py-1 border">{art.modeloInv}</td>
                   <td className="px-2 py-1 border">{art.stockActual}</td>
                   <td className="px-2 py-1 border">{art.stockSeguridad}</td>
+                  <td className="px-2 py-1 border">{art.stockMaximo}</td>
                   <td className="px-2 py-1 border">{art.puntoPedido}</td>
                   <td className="px-2 py-1 border">{art.cgi}</td>
                   <td className="px-2 py-1 border">{art.demandaDiaria}</td>
                   <td className="px-2 py-1 border">{art.tiempoRevision}</td>
                   <td className="px-2 py-1 border">${art.costoAlmacen}</td>
+                  <td className="px-2 py-1 border">{art.qOptimo}</td>
                   <td className="px-3 py-2 border border-gray-700 text-center">
                     <button
-                      onClick={() => setModalEditar(art)}
+                      onClick={() => {
+                        console.log("click en editar",art);
+                        setModalEditar(art)}}
                       className="mr-2 hover:text-yellow-300"
                     >
                       <FaEdit />
@@ -466,7 +476,7 @@ export default function Articulos() {
 
       {/* Modal Agregar */}
       {modalAgregar && (
-        <Modal title="Agregar Artículo" onClose={() => setModalAgregar(false)}>
+        <Modal title="Agregar Artículo" open={modalAgregar} onClose={() => setModalAgregar(false)}>
           <div className="max-h-[80vh] overflow-y-auto p-4">
             <form
               onSubmit={(e: React.FormEvent) => {
@@ -614,7 +624,7 @@ export default function Articulos() {
 
       {/* Modal Edición */}
       {modalEditar && (
-        <Modal title="Editar Artículo" onClose={() => setModalEditar(null)}>
+        <Modal title="Editar Artículo" open={modalEditar !== null} onClose={() => setModalEditar(null)}>
           <div className="max-h-[80vh] overflow-y-auto p-4">
             <form
               onSubmit={(e) => {
@@ -665,7 +675,7 @@ export default function Articulos() {
               <label className="text-white block mb-1">
                 Categoria articulo
               </label>
-              <p>Categoria seleccionada antes: {categoriaSeleccionada}</p>
+              <p>Categoria actual: {categoriaSeleccionada}</p>
               <select
                 name="idCategoriaArticulo"
                 className="w-full px-2 py-1 rounded bg-gray-700 text-white"
@@ -680,7 +690,7 @@ export default function Articulos() {
                   </option>
                 ))}
               </select>
-              <p>Modelo seleccionado antes: {modeloSeleccionado}</p>
+              <p>Modelo actual: {modeloSeleccionado}</p>
               <label className="text-white block mb-1">Modelo inventario</label>
               <select
                 name="modeloInv"
@@ -750,6 +760,7 @@ export default function Articulos() {
       {modalProveedor && (
         <Modal
           title={`Seleccionar proveedor para "${modalProveedor.nombreArticulo}"`}
+          open={modalProveedor !== null}
           onClose={() => setModalProveedor(null)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4">
@@ -800,6 +811,7 @@ export default function Articulos() {
       {modalCalculoGlobal && (
         <Modal
           title="Cálculo de Modelos de Inventario"
+          open={modalCalculoGlobal}
           onClose={() => setModalCalculoGlobal(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4">
@@ -862,6 +874,7 @@ export default function Articulos() {
       {modalReposicionAbierto && (
         <Modal
           title="Artículos a Reponer"
+          open={modalReposicionAbierto}
           onClose={() => setModalReposicionAbierto(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4 text-sm text-white">
@@ -897,6 +910,7 @@ export default function Articulos() {
       {modalFaltantesAbierto && (
         <Modal
           title="Artículos Faltantes"
+          open={modalFaltantesAbierto}
           onClose={() => setModalFaltantesAbierto(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4 text-sm text-white">

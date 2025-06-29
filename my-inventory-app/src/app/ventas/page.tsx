@@ -229,9 +229,13 @@ const filtrados = venta.filter((vta) =>
       const data = await res.json();
       setMensaje(`✅ Venta registrada correctamente. N° Venta: ${data.venta.nVenta}`);
       setArticuloSeleccionado([]);
-    } catch (error: any) {
-      setMensaje("❌ Error al registrar la venta: " + error.message);
-    }
+    }  catch (error: unknown) {
+  if (error instanceof Error) {
+    setMensaje("❌ Error al registrar la venta: " + error.message);
+  } else {
+    setMensaje("❌ Error inesperado");
+  }
+}
   };
 
   return (
