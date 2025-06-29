@@ -241,7 +241,7 @@ export default function Articulos() {
       obtenerArticulos();
     } catch (error) {
       console.error("Error eliminando el artículo:", error);
-      alert("Ocurrió un error al intentar eliminar el artículo.");
+      alert("No se puede eliminar si tiene ordenes Pendientes o Enviadas");
     }
   };
 
@@ -466,7 +466,7 @@ export default function Articulos() {
 
       {/* Modal Agregar */}
       {modalAgregar && (
-        <Modal title="Agregar Artículo" onClose={() => setModalAgregar(false)}>
+        <Modal title="Agregar Artículo" open={modalAgregar} onClose={() => setModalAgregar(false)}>
           <div className="max-h-[80vh] overflow-y-auto p-4">
             <form
               onSubmit={(e: React.FormEvent) => {
@@ -614,7 +614,7 @@ export default function Articulos() {
 
       {/* Modal Edición */}
       {modalEditar && (
-        <Modal title="Editar Artículo" onClose={() => setModalEditar(null)}>
+        <Modal title="Editar Artículo" open={modalReposicionAbierto} onClose={() => setModalEditar(null)}>
           <div className="max-h-[80vh] overflow-y-auto p-4">
             <form
               onSubmit={(e) => {
@@ -750,6 +750,7 @@ export default function Articulos() {
       {modalProveedor && (
         <Modal
           title={`Seleccionar proveedor para "${modalProveedor.nombreArticulo}"`}
+          open={modalProveedor !== null}
           onClose={() => setModalProveedor(null)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4">
@@ -800,6 +801,7 @@ export default function Articulos() {
       {modalCalculoGlobal && (
         <Modal
           title="Cálculo de Modelos de Inventario"
+          open={modalCalculoGlobal}
           onClose={() => setModalCalculoGlobal(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4">
@@ -862,6 +864,7 @@ export default function Articulos() {
       {modalReposicionAbierto && (
         <Modal
           title="Artículos a Reponer"
+          open={modalReposicionAbierto}
           onClose={() => setModalReposicionAbierto(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4 text-sm text-white">
@@ -897,6 +900,7 @@ export default function Articulos() {
       {modalFaltantesAbierto && (
         <Modal
           title="Artículos Faltantes"
+          open={modalFaltantesAbierto}
           onClose={() => setModalFaltantesAbierto(false)}
         >
           <div className="max-h-[80vh] overflow-y-auto p-4 text-sm text-white">

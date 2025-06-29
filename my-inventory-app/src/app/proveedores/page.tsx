@@ -92,7 +92,7 @@ export default function Proveedores() {
   };
 
   const loadProveedores = () => {
-    fetch("http://localhost:5000/Proveedor/activos")
+    fetch("http://localhost:5000/Proveedor/activo")
       .then((res) => res.json())
       .then((data) => {
         console.log("Proveedores desde el back:", data);
@@ -212,7 +212,7 @@ export default function Proveedores() {
                       loadProveedores();
                     } catch (err) {
                       console.error("Error al eliminar proveedor:", err);
-                      alert("Ocurrió un error al eliminar el proveedor");
+                      alert("No se pueden eliminar proveedores predeterminados");
                     }
                   }}
                   className="text-red-500 hover:text-red-400"
@@ -412,6 +412,7 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Precio unitario"
                             value={rel.precioUnitario ?? 0}
+                            min={1} max={1000}
                             onChange={(e) => {
                               const nuevoValor = parseFloat(e.target.value);
                               setRelacionesProveedor((prev) => {
@@ -430,6 +431,7 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Tiempo entrega (días)"
                             value={rel.tiempoEntregaDias}
+                            min={1} max={1000}
                             onChange={(e) => {
                               const nuevas = [...relacionesProveedor];
                               nuevas[index].tiempoEntregaDias = parseInt(
@@ -444,6 +446,7 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Costo de pedido"
                             value={rel.costoPedido}
+                            min={1} max={1000}
                             onChange={(e) => {
                               const nuevas = [...relacionesProveedor];
                               nuevas[index].costoPedido = parseFloat(
@@ -779,6 +782,7 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Precio unitario"
                             value={rel.precioUnitario ?? ""}
+                            min={1} max={1000}
                             onChange={(e) =>
                               actualizarRelacion(
                                 mapIndex,
@@ -792,6 +796,7 @@ export default function Proveedores() {
                           <input
                             type="number"
                             placeholder="Tiempo entrega (días)"
+                            min={1} max={1000}
                             value={rel.tiempoEntregaDias ?? ""}
                             onChange={(e) => {
                               const nuevas = [...nuevasRelaciones];
@@ -807,6 +812,7 @@ export default function Proveedores() {
                             type="number"
                             placeholder="Costo de pedido"
                             value={rel.costoPedido ?? ""}
+                            min={1} max={1000}
                             onChange={(e) => {
                               const nuevas = [...nuevasRelaciones];
                               nuevas[mapIndex].costoPedido = parseFloat(
