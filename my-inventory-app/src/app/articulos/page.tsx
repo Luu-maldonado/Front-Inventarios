@@ -68,6 +68,7 @@ interface CalculoArticulo {
   puntoPedido: number;
   tiempoRevision: number;
   cgi: number;
+  stockMaximo:number;
 }
 
 interface ArticuloAReponer {
@@ -846,6 +847,9 @@ export default function Articulos() {
                       <p>
                         Tiempo de Revisión: <em>(no aplica)</em>
                       </p>
+                      <p>
+                        stock maximo: <strong>{item.stockMaximo}</strong>
+                      </p>
                     </>
                   )}
 
@@ -854,6 +858,9 @@ export default function Articulos() {
                       <p>
                         Tiempo de Revisión:{" "}
                         <strong>{item.tiempoRevision}</strong> días
+                      </p>
+                      <p>
+                        stock maximo: <strong>{item.stockMaximo}</strong>
                       </p>
                       <p>
                         Punto de Pedido: <em>(no aplica)</em>
