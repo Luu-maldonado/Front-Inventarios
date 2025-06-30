@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaTrash } from "react-icons/fa";
-import { FaEdit } from "react-icons/fa";
 
 interface Articulo {
   idArticulo?: number;
@@ -45,29 +43,28 @@ interface Ventas{
   nVenta: number;
   descripcionVenta: string;
   totalVenta: number;
-  detalleVenta:{
-    [x: string]: any;
-    map(arg0: (detalle: any) => { cantidadArticulo: any; idArticulo: any; subTotal: any; }): unknown;
-    cantidadArticulo: number;
+  detalleVenta: DetalleVenta[];
+}
+
+interface DetalleVenta{
+  cantidadArticulo: number;
     idArticulo: number;
     subTotal?: number;
   }
-}
+
 
 interface ArticuloSeleccionado extends Articulo {
   cantidadArticulo: number;
 }
 
-
-
 export default function Ventas() {
   const [articulos, setArticulos] = useState<Articulo[]>([]);
-  const [busqueda, setBusqueda] = useState("");
+  const [busqueda] = useState("");
   const [articuloSeleccionado, setArticuloSeleccionado] = useState<ArticuloSeleccionado[]>([]);
   const [venta, setVenta] = useState<Ventas[]>([]);
   const [mensaje, setMensaje] = useState("");
-   const [modalEditar, setModalEditar] = useState<Articulo | null>(null);
-   const [modalProveedor, setModalProveedor] = useState<Articulo | null>(null);
+  //const [modalEditar, setModalEditar] = useState<Articulo | null>(null);
+  //const [modalProveedor, setModalProveedor] = useState<Articulo | null>(null);
 
     const obtenerArticulos = async () => {
     try {
@@ -139,44 +136,10 @@ useEffect(() => {
       console.error("Error al cargar ventas:", error);
     }
   }
-  const handleEliminar = async (idArticulo: number) => {
-    const confirmacion = window.confirm(
-      "¿Estás seguro de que querés Cancelar esta venta?"
-    );
-    if (!confirmacion) return;
-
-    try {
-      await fetch(
-        `http://localhost:5000/MaestroArticulos/ventas/eliminar-venta/${idArticulo}}`, //ESTO ESTA MAL, FALTA ARREGLAR
-        {
-          method: "DELETE",
-        }
-      );
-
-      alert("Venta Cancelada correctamente.");
-      obtenerArticulos();
-    } catch (error) {
-      console.error("Error, no se pudo eliminar la venta:", error);
-      alert("No se puede eliminar si tiene ordenes Pendientes o Enviadas");
-    }
-  };
-   const abrirModalProveedor = async (articulo: Articulo) => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/MaestroArticulos/articulosLista/proveedores/${articulo.idArticulo}`
-      );
-      const data = await res.json();
-
-      setModalProveedor(articulo);
-    } catch (err) {
-      console.error("Error al obtener proveedores:", err);
-      alert("No se pudieron cargar los proveedores.");
-    }
-  };
 
 const filtrados = venta.filter((vta) =>
   String(vta.nVenta).includes(busqueda) ||
-  vta.detalleVenta.some((det:any) =>
+  vta.detalleVenta.some((det:DetalleVenta) =>
     String(det.idArticulo).includes(busqueda)
   )
 );
@@ -229,6 +192,7 @@ const filtrados = venta.filter((vta) =>
       const data = await res.json();
       setMensaje(`✅ Venta registrada correctamente. N° Venta: ${data.venta.nVenta}`);
       setArticuloSeleccionado([]);
+      obtenerVentas();
     }  catch (error: unknown) {
   if (error instanceof Error) {
     setMensaje("❌ Error al registrar la venta: " + error.message);
@@ -300,40 +264,24 @@ const filtrados = venta.filter((vta) =>
       </div>
 
     </div>
-    <div className="text-white mt-16 " style={{display:'grid',width:'100%',gridColumn:'2/3'}}>
+    <div className="text-white mt-16 mr-4" style={{display:'grid',width:'100%',gridColumn:'2/3'}}>
     <table className="w-full table-auto border-collapse text-sm">
               <thead className="bg-zinc-900 text-zinc-300">
                 <tr>
                   <th className="px-1 py-1 border">Número de Venta</th>
                   <th className="px-2 py-1 border">Descripcion Venta</th>
                   <th className="px-2 py-1 border">Total Venta</th>
-                  <th className="px-2 py-1 border">Acciones</th> 
                 </tr>
               </thead>
               <tbody>
-                {filtrados.map((vta:any) => {
+                {filtrados.map((vta:Ventas) => {
                  
                   return (
                     <tr key={vta.nVenta} className="hover:bg-zinc-800">
 
                       <td className="px-2 py-1 border">{vta.nVenta}</td>
                       <td className="px-2 py-1 border">{vta.descripcionVenta}</td>
-                      <td className="px-2 py-1 border">{vta.totalVenta}</td>
-                      <td className="px-2 py-1 border">
-                       
-                        <button
-                          onClick={() => setModalEditar(vta)}
-                          className="mr-2 hover:text-yellow-300"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleEliminar(vta.nVenta!)}
-                          className="hover:text-red-500"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
+                      <td className="px-2 py-1 border">${vta.totalVenta}</td>
                     </tr>
                   );
                 })}

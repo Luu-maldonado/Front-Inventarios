@@ -626,7 +626,7 @@ export default function Ordenes() {
                       }
                     );
 
-                    if (!res.ok) throw new Error("No se pudo crear la orden.");
+                    if (!res.ok) throw new Error("Supero el stock maximo, no puede crear la orden");
                     alert("Orden creada correctamente");
                     cerrarModal();
                     cargarOrdenes();
